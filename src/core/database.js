@@ -1,0 +1,183 @@
+/**
+ * Created by wellington on 07/04/17.
+ *
+ *
+ * May 10, 2017
+ * Changed the database to return the PG object
+ *
+ */
+
+import mongoose from 'mongoose'
+import fs from 'fs'
+
+const logger = require(`./logger`)
+
+
+
+var models = []
+
+class  Database
+{
+    constructor()
+    {
+        mongoose.connect(process.env.mongo_uri, {
+            useUnifiedTopology: true,
+            useNewUrlParser: true,
+            useFindAndModify:false
+        })
+    }
+
+    async load( collection )
+    {
+        if ( models[`${collection}`] !== undefined )
+            return models[`${collection}`]
+
+        if ( fs.existsSync(`./test/models/schemas/${collection}.json`) )
+        {
+            const Schema = new mongoose.Schema(require(`../../test/models/schemas/${collection}.json`))
+            models[`${collection}`] = mongoose.model(collection, Schema)
+            return models[`${collection}`]
+        }
+    }
+
+    async select ( collection, where={} )
+    {
+        try
+        {
+            const model = await this.load(collection)
+            return await model.find(where)
+        }
+        catch (e)
+        {
+            console.log(`Error: `, e)
+            return e
+        }
+    }
+
+    async insert ( collection, data )
+    {
+        try
+        {
+            const model = await this.load(collection)
+            collection = new model(data)
+            return await collection.save()
+        }
+        catch (e)
+        {
+            console.log(`Error: `, e)
+            return e
+        }
+    }
+
+    async update( collection, data, where )
+    {
+        try
+        {
+            const model = await this.load(collection)
+            await model.findOneAndUpdate(where, data)
+            return await model.find(where)
+        }
+        catch (e)
+        {
+            console.log(`Error: `, e)
+            return e
+        }
+    }
+
+    async delete( collection, where )
+    {
+        try
+        {
+            const model = await this.load(collection)
+            return await model.findOneAndRemove(where)
+        }
+        catch (e)
+        {
+            console.log(`Error: `, e)
+            return e
+        }
+    }
+
+    async query(sql)
+    {
+        if ( process.env.db_type === `postgres` )
+        {
+            return new Promise(function (resolve, reject)
+            {
+                const user = `${process.env.db_user || process.env.USER}`
+                const pass = `${process.env.db_pass || ''}`
+                const host = `${process.env.db_host || 'localhost'}`
+                const base = `${process.env.db_base || ''}`
+
+
+                if ( !process.env.db_user )
+                    logger.error(`Your '.env' file seem to have no database users '${process.env.USER}' will be take`)
+                if ( !process.env.db_pass )
+                    logger.error(`It seems in '.env' file have no password for database user '${user}', blank will be taken as default!`)
+                if ( !process.env.db_host )
+                    logger.error(`No hostname was specified in your '.env' file '${host}' will be taken`)
+                if ( !process.env.db_base )
+                    logger.error(`It seems you have no database set in your '.env' file blank will be taken`)
+
+                const Pool = require('pg').Pool
+                const config =
+                {
+                    user:user,
+                    password:pass,
+                    host:host,
+                    database:base,
+                    max:10,
+                    idleTimeoutMillis: 1000,
+                }
+
+                const pool = new Pool(config)
+
+                pool.on(`error`, (e, client) =>
+                {
+                    console.log(e)
+                    console.log(client)
+                    // if a client is idle in the pool
+                    // and receives an error - for example when your PostgreSQL server restarts
+                    // the pool will catch the error & let you handle it here
+                });
+
+                pool.query(sql, (err, result) =>
+                {
+                    if (err)
+                    {
+                        console.log(err)
+                        logger.log_query(sql)
+
+                        logger.error(`You have some error while try to run "${sql}" in your database!`)
+
+                        if ( err.code === `28000` )
+                            resolve({ code:err.code, message:`INVALID AUTHORIZATION SPECIFICATION` })
+
+                        resolve(err)
+                    }
+                    else
+                    {
+                        if ( typeof result === undefined ) resolve([])
+
+                        logger.log_query(sql)
+                        resolve(result.rows)
+                    }
+                })
+            })
+        }
+        else if ( process.env.db_type === `mysql` )
+        {
+
+        }
+        else
+        {
+            console.log(`To you use some database you need to set up it's configuration on you ".env" file`)
+            return {
+                code: `ERR`,
+                message:`Database configuration error!`
+            }
+        }
+    }
+}
+
+export default Database
