@@ -9,9 +9,6 @@ import fs from 'fs'
 import cors from 'cors'
 import helmet from 'helmet'
 import bodyParser from 'body-parser'
-import dotenv from 'dotenv'
-
-dotenv.config()
 
 module.exports =
 {
@@ -24,15 +21,6 @@ module.exports =
         app.use(cors())
         app.use(bodyParser.json())
         app.use(bodyParser.urlencoded({extended: false}))
-
-        // app.use(uploader())
-        // let qt = require('quickthumb')
-        // let uploader = require(`express-fileupload`)
-
-        // app.use(express.static(`${STATIC_PATH}`))
-        // app.use('/images', qt.static(`${STATIC_PATH}/images`))
-        // app.use('/media', qt.static(`${STATIC_PATH}/media`))
-        // app.use(`/uploads`, qt.static(`${STATIC_PATH}/uploads`))
 
         if ( process.env.ssl === `true` )
         {
@@ -81,7 +69,7 @@ module.exports =
         {
             global.client_names = []
             const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM applications`)
-            result.forEach(value => client_names.push(value.app_name))
+            result.map(value => client_names.push(value.app_name))
 
             const oauthserver = require('oauth2-server')
             app.oauth = oauthserver(

@@ -32,9 +32,9 @@ class  Database
         if ( models[`${collection}`] !== undefined )
             return models[`${collection}`]
 
-        if ( fs.existsSync(`./test/models/schemas/${collection}.json`) )
+        if ( fs.existsSync(`${APP_PATH}/models/schemas/${collection}.json`) )
         {
-            const Schema = new mongoose.Schema(require(`../../test/models/schemas/${collection}.json`))
+            const Schema = new mongoose.Schema(require(`${APP_PATH}/models/schemas/${collection}.json`))
             models[`${collection}`] = mongoose.model(collection, Schema)
             return models[`${collection}`]
         }

@@ -2,27 +2,25 @@
  * Created by wellington on 27/07/2017.
  */
 
-//let access = require('./logger').createLogger(`${process.env.PWD}/logs/access.log`)
 
-let accesslog = require('access-log')
-let fs = require('fs')
+const accesslog = require('access-log')
+const fs = require('fs')
 
-let debug = process.env.debug || 0
+const debug = process.env.debug || 0
 
 module.exports =
 {
-    access:function (req, res)
+    access: (req, res) =>
     {
-        let access_token = ''
+        const access_token = req.oauth?req.oauth.bearerToken.accessToken: ``
+        const log_format = `USERID=":userID"; IP=":ip"; XIP=":Xip"; HOST=":host"; METHOD=":method"; PROTO=":protocol"; URL=":url"; USERAGENT=":userAgent"; PERIOD[FROM=":startDate :startTime" TO=":endDate :endTime"]; CLF=":clfDate"; DELTA=":delta"; HTTP_VERSION=":httpVersion"; REFERER=":referer"; URL_DECODED=":urlDecoded"; LENGTH=":contentLength"; ACCESS_TOKEN="${access_token}"`
 
-        if(req.oauth)
-           access_token = req.oauth.bearerToken.accessToken
+        if ( !fs.existsSync(`${LOG_PATH}`) )
+            fs.mkdirSync(`${LOG_PATH}`)
 
-        let log_format = `USERID=":userID"; IP=":ip"; XIP=":Xip"; HOST=":host"; METHOD=":method"; PROTO=":protocol"; URL=":url"; USERAGENT=":userAgent"; PERIOD[FROM=":startDate :startTime" TO=":endDate :endTime"]; CLF=":clfDate"; DELTA=":delta"; HTTP_VERSION=":httpVersion"; REFERER=":referer"; URL_DECODED=":urlDecoded"; LENGTH=":contentLength"; ACCESS_TOKEN="${access_token}"`
-
-        accesslog(req, res, log_format, function (data)
+        accesslog(req, res, log_format, data =>
         {
-            if(debug > 0 || debug == 'access')
+            if(debug > 0 || debug === `access`)
             {
                 console.log('')
                 console.log('################ Access Log ################')
@@ -30,21 +28,13 @@ module.exports =
                 console.log('')
             }
 
-            fs.open(`${LOG_PATH}/access.log`, 'a', 666, function( e, id )
-            {
-                fs.write( id, `${data}\n`, null, 'utf8', function()
-                {
-                    fs.close(id, function ()
-                    {
-                        //console.log('file closed')
-                    })
-                })
-            })
-
+            fs.open(`${LOG_PATH}/access.log`, 'a', 666, ( e, id ) =>
+                fs.write( id, `${data}\n`, null, 'utf8', () =>
+                    fs.close(id, () => {})))
         })
     },
 
-    log_zoho_request:function (config)
+    log_zoho_request: config =>
     {
         let method = config.method || 'GET'
         let url = config.url
@@ -53,31 +43,24 @@ module.exports =
 
         let data = `[${new Date()}] METHOD="${method}"; URL="${url}"; DATA="${form}"; ACCESS_TOKEN="${opp_access_token}";`
 
-        fs.open(`${LOG_PATH}/zoho.log`, 'a', 666, function( e, id )
+        if( debug > 0 || debug === `zoho` )
         {
-            fs.write( id, `${data}\n`, null, 'utf8', function()
-            {
-                if(debug > 0 || debug == 'zoho')
-                {
-                    console.log('')
-                    console.log('################ Request Log ################')
-                    console.log(data)
-                    console.log('')
-                }
+            console.log('')
+            console.log('################ Request Log ################')
+            console.log(data)
+            console.log('')
+        }
 
-                fs.close(id, function()
-                {
-                    //console.log('file closed')
-                })
-            })
-        })
+        fs.open(`${LOG_PATH}/zoho.log`, 'a', 666, ( e, id ) =>
+            fs.write( id, `${data}\n`, null, 'utf8', () =>
+                fs.close(id, () => {})))
     },
 
-    log_query:function (sql)
+    log_query: sql =>
     {
         let data = `[${new Date()}] ${sql}`
 
-        if(debug > 0 || debug == 'sql')
+        if( debug > 0 || debug === `sql` )
         {
             console.log('')
             console.log('################ SQL Log ################')
@@ -85,24 +68,19 @@ module.exports =
             console.log('')
         }
 
-        fs.open(`${LOG_PATH}/query.log`, 'a', 666, function( e, id )
-        {
-            fs.write( id, `${data}\n`, null, 'utf8', function()
-            {
-                fs.close(id, function()
-                {
-                    //console.log('file closed')
-                })
-            })
-        })
+        if ( !fs.existsSync(`${LOG_PATH}`) )
+            fs.mkdirSync(`${LOG_PATH}`)
 
+        fs.open(`${LOG_PATH}/query.log`, 'a', 666, ( e, id ) =>
+            fs.write( id, `${data}\n`, null, 'utf8', () =>
+                fs.close(id, () => {}) ))
     },
 
-    error:function (error)
+    error: error =>
     {
         let data = `[${new Date()}] ${error}`
 
-        if(debug > 0 || debug == 'error')
+        if( debug > 0 || debug === `error` )
         {
             console.log('')
             console.log('################ Error Log ################')
@@ -113,17 +91,9 @@ module.exports =
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
 
-
-        fs.open(`${LOG_PATH}/error.log`, 'a', 666, function ( e, id )
-        {
-            fs.write( id, `${data}\n`, null, 'utf8', function ()
-            {
-                fs.close(id, function()
-                {
-                    //console.log('file closed')
-                })
-            })
-        })
+        fs.open(`${LOG_PATH}/error.log`, 'a', 666, ( e, id ) =>
+            fs.write( id, `${data}\n`, null, 'utf8', () =>
+                fs.close(id, () => {})))
     }
 }
 

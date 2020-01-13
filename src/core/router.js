@@ -10,16 +10,18 @@ class Router
 {
     constructor()
     {
+        this.register = []
         try
         {
-            this.register = require('../../../test/register')
+            this.register = require(`${APP_PATH}/register`)
 
             if (fs.existsSync(`${APP_PATH}/.conf/routes.json`))
                 routes = require(`${APP_PATH}/.conf/routes.json`)
         }
         catch (e)
         {
-            console.log(`Error: `, e)
+            console.log(e)
+            console.log(`Error: Can not find '${APP_PATH}/register.js'`)
         }
     }
 
@@ -27,7 +29,7 @@ class Router
     {
         let route_to = req.path
         for (let key in routes)
-            if(req.path.startsWith(key))
+            if( req.path.startsWith(key) )
                 route_to = routes[key]
         let regex = new RegExp(`{\\*}`)
         return regex.test(route_to)
@@ -107,65 +109,73 @@ class Router
             class_name = class_name.split(`/`).join(`_`)
         }
 
-        const _class = new this.register[class_name]
 
-        if( route_to[ counter ] && typeof _class[route_to[counter]] === `function` )
+        if ( this.register[class_name] !== undefined )
         {
-            method = route_to[counter]
-            url_params = url_params.replace( `${method}/`, `` )
-            counter ++
-            url_params = url_params.replace( method, `` )
-        }
+            const _class = new this.register[class_name]
 
-        if( typeof _class.params === `function` )
-        {
-            let param_values = url_params.split(`/`)
-
-            let param_keys = _class.params()
-            for (let i = 0; i < param_keys.length; i ++) params[param_keys[i]] = param_values[i + 1]
-        }
-
-        global.parameters = params
-
-        const input = new Input()
-
-        if( input.oauth() )
-            client_id = input.oauth(`clientId`).toLowerCase()
-
-        if( permitted_applications[0] === `` )
-            permitted_applications[0]  = `*`
-
-        if( permitted_applications.includes(client_id) || permitted_applications[0] === `*` )
-            application_permission = true
-
-        if ( this.register[class_name].assign )
-        {
-            let assigned_applications = this.register[class_name].assign()
-
-            application_permission = !( assigned_applications !== undefined && assigned_applications.length && !assigned_applications.includes(client_id) )
-            permitted_applications = assigned_applications
-        }
-
-        console.log(`Params ->`, params)
-        console.log(`Permitted applications ->`, permitted_applications)
-
-        const config =
-        {
-            class:_class,
-            folder:folder,
-            controller:controller,
-            class_name:class_name,
-            method:method,
-            permission:application_permission,
-            applications:
+            if( route_to[ counter ] && typeof _class[route_to[counter]] === `function` )
             {
-                allowed: permitted_applications,
-                accessed:client_id
-            },
-            params:params
-        }
+                method = route_to[counter]
+                url_params = url_params.replace( `${method}/`, `` )
+                counter ++
+                url_params = url_params.replace( method, `` )
+            }
 
-        return config
+            if( typeof _class.params === `function` )
+            {
+                let param_values = url_params.split(`/`)
+
+                let param_keys = _class.params()
+                for (let i = 0; i < param_keys.length; i ++) params[param_keys[i]] = param_values[i + 1]
+            }
+
+            global.parameters = params
+
+            const input = new Input()
+
+            if( input.oauth() )
+                client_id = input.oauth(`clientId`).toLowerCase()
+
+            if( permitted_applications[0] === `` )
+                permitted_applications[0]  = `*`
+
+            if( permitted_applications.includes(client_id) || permitted_applications[0] === `*` )
+                application_permission = true
+
+            if ( this.register[class_name].assign )
+            {
+                let assigned_applications = this.register[class_name].assign()
+
+                application_permission = !( assigned_applications !== undefined && assigned_applications.length && !assigned_applications.includes(client_id) )
+                permitted_applications = assigned_applications
+            }
+
+            console.log( `Params ->`, params )
+            console.log( `Permitted applications ->`, permitted_applications )
+
+            const config =
+            {
+                _class:_class,
+                folder:folder,
+                controller:controller,
+                class_name:class_name,
+                method:method,
+                permission:application_permission,
+                applications:
+                {
+                    allowed: permitted_applications,
+                    accessed:client_id
+                },
+                params:params
+            }
+
+            return config
+        }
+        else
+        {
+            return null
+        }
     }
 }
 

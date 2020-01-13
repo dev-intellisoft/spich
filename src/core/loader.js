@@ -11,7 +11,7 @@ class Loader
     {
         try
         {
-            this.register = require('../../../test/register')
+            this.register = require(`${APP_PATH}/register`)
         }
         catch (e)
         {

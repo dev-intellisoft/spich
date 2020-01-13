@@ -16,7 +16,7 @@ export async function my_request(config)
 
     return new Promise((resolve, reject) =>
     {
-        if(method == 'post' || method == 'put')
+        if(method === 'post' || method === 'put')
         {
             logger.log_zoho_request(config)
             if(config.json)
@@ -33,7 +33,7 @@ export async function my_request(config)
 
                         if (config.form.is_mailchimp)  resolve(response)
 
-                        if(resp.statusCode == opp.http.OK || resp.statusCode == opp.http.CREATED || resp.statusCode == opp.http.ACCEPTED)
+                        if(resp.statusCode === opp.http.OK || resp.statusCode === opp.http.CREATED || resp.statusCode === opp.http.ACCEPTED)
                         {
                             resolve(response)
                         }
@@ -62,11 +62,11 @@ export async function my_request(config)
 
                         if (config.form.is_mailchimp)  resolve(response)
 
-                        if(resp.statusCode == opp.http.OK || resp.statusCode == opp.http.CREATED || resp.statusCode == opp.http.ACCEPTED )
+                        if(resp.statusCode === opp.http.OK || resp.statusCode === opp.http.CREATED || resp.statusCode === opp.http.ACCEPTED )
                         {
                             resolve(response)
                         }
-                        else if (resp.statusCode == 400)
+                        else if (resp.statusCode === 400)
                         {
                             resolve(response)
                         }
@@ -92,11 +92,11 @@ export async function my_request(config)
                     },
                     function (err, resp, body)
                     {
-                        if (resp.statusCode == opp.http.OK || resp.statusCode == opp.http.CREATED || resp.statusCode == opp.http.ACCEPTED)
+                        if (resp.statusCode === opp.http.OK || resp.statusCode === opp.http.CREATED || resp.statusCode === opp.http.ACCEPTED)
                         {
                             resolve(JSON.parse(body))
                         }
-                        else if(resp.statusCode == opp.http.BAD_REQUEST)
+                        else if(resp.statusCode === opp.http.BAD_REQUEST)
                         {
                             resolve(JSON.parse(body))
                         }
@@ -129,9 +129,9 @@ export async function my_request(config)
                 function (err, resp, body)
                 {
 
-                    if (resp.statusCode == opp.http.OK)
+                    if (resp.statusCode === opp.http.OK)
                     {
-                        if(config.accept == 'pdf')
+                        if(config.accept === 'pdf')
                         {
                             pdf.create(body).toBuffer(function(err, buffer)
                             {
@@ -143,7 +143,7 @@ export async function my_request(config)
                             resolve(JSON.parse(body))
                         }
                     }
-                    else if(resp.statusCode == opp.http.BAD_REQUEST)
+                    else if(resp.statusCode === opp.http.BAD_REQUEST)
                     {
                         resolve(JSON.parse(body))
                     }
