@@ -1,6 +1,6 @@
 {
   "name": "spich",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Spich FrameWork",
   "main": "index.js",
   "directories": {
@@ -12,8 +12,7 @@
   },
   "author": "Wellington Cunha",
   "license": "ISC",
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
     "access-log": "^0.4.1",
     "babel-core": "^6.26.3",
@@ -26,14 +25,14 @@
     "babel-preset-stage-2": "^6.24.1",
     "babel-preset-stage-3": "^6.24.1",
     "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "eslint": "^6.8.0",
+    "eslint-loader": "^3.0.3",
     "express": "^4.17.1",
     "glob": "^7.1.6",
     "helmet": "^3.21.2",
     "mongoose": "^5.8.3",
     "pg": "^7.15.1",
-    "dotenv": "^8.2.0",
-    "eslint": "^6.8.0",
-    "eslint-loader": "^3.0.3",
     "supervisor": "^0.12.0"
   }
 }
