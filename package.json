@@ -3,7 +3,6 @@
   "version": "1.0.4",
   "description": "Spich FrameWork",
   "main": "index.js",
-  "type": "module",
   "directories": {
     "test": "test"
   },
