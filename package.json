@@ -1,6 +1,6 @@
 {
   "name": "spich",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Spich FrameWork",
   "main": "index.js",
   "directories": {
@@ -19,6 +19,7 @@
     "supervisor": "^0.12.0"
   },
   "dependencies": {
+    "access-log": "^0.4.1",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
@@ -28,7 +29,6 @@
     "babel-preset-stage-1": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "babel-preset-stage-3": "^6.24.1",
-    "access-log": "^0.4.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "glob": "^7.1.6",
