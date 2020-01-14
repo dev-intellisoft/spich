@@ -3,6 +3,7 @@
   "version": "1.0.3",
   "description": "Spich FrameWork",
   "main": "index.js",
+  "type": "module",
   "directories": {
     "test": "test"
   },
@@ -12,7 +13,9 @@
   },
   "author": "Wellington Cunha",
   "license": "ISC",
-  "devDependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.26.0"
+  },
   "dependencies": {
     "access-log": "^0.4.1",
     "babel-core": "^6.26.3",
