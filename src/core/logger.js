@@ -3,14 +3,14 @@
  */
 
 
-const accesslog = require('access-log')
-const fs = require('fs')
+import accesslog from 'access-log'
+import fs from 'fs'
 
 const debug = process.env.debug || 0
 
-module.exports =
+class logger
 {
-    access: (req, res) =>
+    access (req, res)
     {
         const access_token = req.oauth?req.oauth.bearerToken.accessToken: ``
         const log_format = `USERID=":userID"; IP=":ip"; XIP=":Xip"; HOST=":host"; METHOD=":method"; PROTO=":protocol"; URL=":url"; USERAGENT=":userAgent"; PERIOD[FROM=":startDate :startTime" TO=":endDate :endTime"]; CLF=":clfDate"; DELTA=":delta"; HTTP_VERSION=":httpVersion"; REFERER=":referer"; URL_DECODED=":urlDecoded"; LENGTH=":contentLength"; ACCESS_TOKEN="${access_token}"`
@@ -32,9 +32,9 @@ module.exports =
                 fs.write( id, `${data}\n`, null, 'utf8', () =>
                     fs.close(id, () => {})))
         })
-    },
+    }
 
-    log_zoho_request: config =>
+    log_zoho_request( config )
     {
         let method = config.method || 'GET'
         let url = config.url
@@ -54,9 +54,9 @@ module.exports =
         fs.open(`${LOG_PATH}/zoho.log`, 'a', 666, ( e, id ) =>
             fs.write( id, `${data}\n`, null, 'utf8', () =>
                 fs.close(id, () => {})))
-    },
+    }
 
-    log_query: sql =>
+    log_query( sql )
     {
         let data = `[${new Date()}] ${sql}`
 
@@ -74,9 +74,9 @@ module.exports =
         fs.open(`${LOG_PATH}/query.log`, 'a', 666, ( e, id ) =>
             fs.write( id, `${data}\n`, null, 'utf8', () =>
                 fs.close(id, () => {}) ))
-    },
+    }
 
-    error: error =>
+    error( error )
     {
         let data = `[${new Date()}] ${error}`
 
@@ -96,4 +96,6 @@ module.exports =
                 fs.close(id, () => {})))
     }
 }
+
+export default logger
 

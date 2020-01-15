@@ -9,10 +9,12 @@ import fs from 'fs'
 import cors from 'cors'
 import helmet from 'helmet'
 import bodyParser from 'body-parser'
+import https from 'spdy'
+import http from 'http'
 
-module.exports =
+class framework
 {
-    run: async () =>
+    async run()
     {
         const app = express()
         app.use(helmet())
@@ -25,7 +27,7 @@ module.exports =
         if ( process.env.ssl === `true` )
         {
             const port = process.env.server_port || 443
-            const https = require(`spdy`)
+
             const credentials =
             {
                 key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
@@ -45,7 +47,7 @@ module.exports =
         else
         {
             const port = process.env.server_port || 80
-            const http = require(`http`)
+
             const http_server = http.createServer(app)
             http_server.listen(port)
 
@@ -57,6 +59,7 @@ module.exports =
 
             console.log(`The server was started at port ${port}`)
         }
+
 
         process.on(`uncaughtException`, (err) =>
         {
@@ -73,11 +76,11 @@ module.exports =
 
             const oauthserver = require('oauth2-server')
             app.oauth = oauthserver(
-            {
-                model: require(`${CORE_PATH}/oauth-pg`),
-                grants: [`auth_code`, `password`, `refresh_token`],
-                debug: true
-            })
+                {
+                    model: require(`${CORE_PATH}/oauth-pg`),
+                    grants: [`auth_code`, `password`, `refresh_token`],
+                    debug: true
+                })
 
             app.all(`/oauth/token`, app.oauth.grant())
 
@@ -99,3 +102,5 @@ module.exports =
         }
     }
 }
+
+export framework

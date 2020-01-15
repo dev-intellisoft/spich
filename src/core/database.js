@@ -10,7 +10,7 @@
 import mongoose from 'mongoose'
 import fs from 'fs'
 
-const logger = require(`./logger`)
+import logger from './logger'
 
 
 

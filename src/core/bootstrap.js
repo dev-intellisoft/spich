@@ -2,8 +2,7 @@
  * Created by wellington on 08/08/2017.
  */
 
-const logger = require(`./logger`)
-
+import logger from './logger'
 import Router from '../core/router'
 
 class Bootstrap
