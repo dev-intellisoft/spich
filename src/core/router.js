@@ -10,11 +10,8 @@ class Router
 {
     constructor()
     {
-        this.register = []
         try
         {
-            this.register = require(`${APP_PATH}/register`)
-
             if (fs.existsSync(`${APP_PATH}/.conf/routes.json`))
                 routes = require(`${APP_PATH}/.conf/routes.json`)
         }
@@ -37,8 +34,9 @@ class Router
 
     is_static = req => ( req.path === `/favicon.ico` )
 
-    router = req =>
+    router = async ( req ) =>
     {
+
         let params = {}
         let route_to = req.path
 
@@ -110,9 +108,9 @@ class Router
         }
 
 
-        if ( this.register[class_name] !== undefined )
+        if ( register[class_name] !== undefined )
         {
-            const _class = new this.register[class_name]
+            const _class = new register[class_name]
 
             if( route_to[ counter ] && typeof _class[route_to[counter]] === `function` )
             {
@@ -143,9 +141,9 @@ class Router
             if( permitted_applications.includes(client_id) || permitted_applications[0] === `*` )
                 application_permission = true
 
-            if ( this.register[class_name].assign )
+            if ( register[class_name].assign )
             {
-                let assigned_applications = this.register[class_name].assign()
+                let assigned_applications = register[class_name].assign()
 
                 application_permission = !( assigned_applications !== undefined && assigned_applications.length && !assigned_applications.includes(client_id) )
                 permitted_applications = assigned_applications
@@ -155,20 +153,20 @@ class Router
             console.log( `Permitted applications ->`, permitted_applications )
 
             const config =
-            {
-                _class:_class,
-                folder:folder,
-                controller:controller,
-                class_name:class_name,
-                method:method,
-                permission:application_permission,
-                applications:
                 {
-                    allowed: permitted_applications,
-                    accessed:client_id
-                },
-                params:params
-            }
+                    _class:_class,
+                    folder:folder,
+                    controller:controller,
+                    class_name:class_name,
+                    method:method,
+                    permission:application_permission,
+                    applications:
+                        {
+                            allowed: permitted_applications,
+                            accessed:client_id
+                        },
+                    params:params
+                }
 
             return config
         }

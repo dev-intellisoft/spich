@@ -29,11 +29,11 @@ class framework
             const port = process.env.server_port || 443
 
             const credentials =
-            {
-                key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
-                cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
-                passphrase: process.env.ssl_pass
-            }
+                {
+                    key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
+                    cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
+                    passphrase: process.env.ssl_pass
+                }
 
             const https_server = https.createServer(credentials, app) //added
 

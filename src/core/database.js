@@ -20,11 +20,14 @@ class  Database
 {
     constructor()
     {
-        mongoose.connect(process.env.mongo_uri, {
-            useUnifiedTopology: true,
-            useNewUrlParser: true,
-            useFindAndModify:false
-        })
+        if ( process.env.db_type === `mongo` )
+        {
+            mongoose.connect(process.env.mongo_uri, {
+                useUnifiedTopology: true,
+                useNewUrlParser: true,
+                useFindAndModify:false
+            })
+        }
     }
 
     async load( collection )
@@ -121,14 +124,14 @@ class  Database
 
                 const Pool = require('pg').Pool
                 const config =
-                {
-                    user:user,
-                    password:pass,
-                    host:host,
-                    database:base,
-                    max:10,
-                    idleTimeoutMillis: 1000,
-                }
+                    {
+                        user:user,
+                        password:pass,
+                        host:host,
+                        database:base,
+                        max:10,
+                        idleTimeoutMillis: 1000,
+                    }
 
                 const pool = new Pool(config)
 

@@ -7,23 +7,11 @@ import loadable from './loadable'
 
 class Loader
 {
-    constructor()
-    {
-        try
-        {
-            this.register = require(`${APP_PATH}/register`)
-        }
-        catch (e)
-        {
-            console.log(`Error: `, e)
-        }
-    }
-
     model = model_name =>
     {
         try
         {
-            this[`${model_name}_model`] = new this.register[`${model_name}_model`]()
+            this[`${model_name}_model`] = new register[`${model_name}_model`]()
         }
         catch ( e )
         {
@@ -35,7 +23,7 @@ class Loader
     {
         try
         {
-            this[`${controller_name}`] = new this.register[`${controller_name}`]()
+            this[`${controller_name}`] = new register[`${controller_name}`]()
         }
         catch ( e )
         {
@@ -47,7 +35,7 @@ class Loader
     {
         try
         {
-            this[`${library_name}_lib`] = new this.register[`${library_name}_lib`]()
+            this[`${library_name}_lib`] = new register[`${library_name}_lib`]()
         }
         catch ( e )
         {

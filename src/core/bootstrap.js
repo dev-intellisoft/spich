@@ -15,8 +15,9 @@ class Bootstrap
     {
         global.request = req
         global.response = res
+        global.register = await import(`${APP_PATH}/register`)
 
-        const config = new Router().router(req)
+        const config = await new Router().router(req)
 
         if ( !config )
         {
@@ -32,7 +33,7 @@ class Bootstrap
             {
                 const output = await _class[method]()
 
-                logger.access(req, res)
+                new logger().access(req, res)
 
                 if( Buffer.isBuffer(output) )
                     res.set('Content-type','application/pdf')
