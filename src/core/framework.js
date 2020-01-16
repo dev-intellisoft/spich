@@ -103,4 +103,4 @@ class framework
     }
 }
 
-export framework
+export default framework
