@@ -30,20 +30,21 @@ class  Database
         }
     }
 
-    async load( collection )
+    load = async ( collection ) =>
     {
         if ( models[`${collection}`] !== undefined )
             return models[`${collection}`]
 
-        if ( fs.existsSync(`${APP_PATH}/models/schemas/${collection}.json`) )
+        if ( fs.existsSync(`${APP_PATH}/models/schemas/${collection}.js`) )
         {
-            const Schema = new mongoose.Schema(require(`${APP_PATH}/models/schemas/${collection}.json`))
+            const s = await import(`${APP_PATH}/models/schemas/${collection}.js`)
+            const Schema = new mongoose.Schema(s.model())
             models[`${collection}`] = mongoose.model(collection, Schema)
             return models[`${collection}`]
         }
     }
 
-    async select ( collection, where={} )
+    select = async ( collection, where={} ) =>
     {
         try
         {
@@ -57,7 +58,7 @@ class  Database
         }
     }
 
-    async insert ( collection, data )
+    insert = async ( collection, data ) =>
     {
         try
         {
@@ -72,7 +73,7 @@ class  Database
         }
     }
 
-    async update( collection, data, where )
+    update = async ( collection, data, where ) =>
     {
         try
         {
@@ -87,7 +88,7 @@ class  Database
         }
     }
 
-    async delete( collection, where )
+    delete = async ( collection, where ) =>
     {
         try
         {
@@ -101,7 +102,7 @@ class  Database
         }
     }
 
-    async query(sql)
+    query = async sql =>
     {
         if ( process.env.db_type === `postgres` )
         {
@@ -111,7 +112,6 @@ class  Database
                 const pass = `${process.env.db_pass || ''}`
                 const host = `${process.env.db_host || 'localhost'}`
                 const base = `${process.env.db_base || ''}`
-
 
                 if ( !process.env.db_user )
                     logger.error(`Your '.env' file seem to have no database users '${process.env.USER}' will be take`)
@@ -124,14 +124,14 @@ class  Database
 
                 const Pool = require('pg').Pool
                 const config =
-                    {
-                        user:user,
-                        password:pass,
-                        host:host,
-                        database:base,
-                        max:10,
-                        idleTimeoutMillis: 1000,
-                    }
+                {
+                    user:user,
+                    password:pass,
+                    host:host,
+                    database:base,
+                    max:10,
+                    idleTimeoutMillis: 1000,
+                }
 
                 const pool = new Pool(config)
 

@@ -125,20 +125,23 @@ class Router
                 let param_values = url_params.split(`/`)
 
                 let param_keys = _class.params()
-                for (let i = 0; i < param_keys.length; i ++) params[param_keys[i]] = param_values[i + 1]
+                for (let i = 0; i < param_keys.length; i ++)
+                    params[param_keys[i]] = param_values[i]
             }
+
+            console.log(`#####>`, params)
 
             global.parameters = params
 
             const input = new Input()
 
-            if( input.oauth() )
+            if ( input.oauth() )
                 client_id = input.oauth(`clientId`).toLowerCase()
 
-            if( permitted_applications[0] === `` )
+            if ( permitted_applications[0] === `` )
                 permitted_applications[0]  = `*`
 
-            if( permitted_applications.includes(client_id) || permitted_applications[0] === `*` )
+            if ( permitted_applications.includes(client_id) || permitted_applications[0] === `*` )
                 application_permission = true
 
             if ( register[class_name].assign )
@@ -153,20 +156,20 @@ class Router
             console.log( `Permitted applications ->`, permitted_applications )
 
             const config =
+            {
+                _class:_class,
+                folder:folder,
+                controller:controller,
+                class_name:class_name,
+                method:method,
+                permission:application_permission,
+                applications:
                 {
-                    _class:_class,
-                    folder:folder,
-                    controller:controller,
-                    class_name:class_name,
-                    method:method,
-                    permission:application_permission,
-                    applications:
-                        {
-                            allowed: permitted_applications,
-                            accessed:client_id
-                        },
-                    params:params
-                }
+                    allowed: permitted_applications,
+                    accessed:client_id
+                },
+                params:params
+            }
 
             return config
         }
