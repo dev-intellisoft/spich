@@ -9,8 +9,8 @@
 
 import mongoose from 'mongoose'
 import fs from 'fs'
-
 import logger from './logger'
+import Pool from 'pg-pool'
 
 
 
@@ -122,7 +122,6 @@ class  Database
                 if ( !process.env.db_base )
                     logger.error(`It seems you have no database set in your '.env' file blank will be taken`)
 
-                const Pool = require('pg').Pool
                 const config =
                 {
                     user:user,
@@ -139,9 +138,6 @@ class  Database
                 {
                     console.log(e)
                     console.log(client)
-                    // if a client is idle in the pool
-                    // and receives an error - for example when your PostgreSQL server restarts
-                    // the pool will catch the error & let you handle it here
                 });
 
                 pool.query(sql, (err, result) =>
@@ -149,9 +145,9 @@ class  Database
                     if (err)
                     {
                         console.log(err)
-                        logger.log_query(sql)
+                        new logger().log_query(sql)
 
-                        logger.error(`You have some error while try to run "${sql}" in your database!`)
+                        new logger().error(`You have some error while try to run "${sql}" in your database!`)
 
                         if ( err.code === `28000` )
                             resolve({ code:err.code, message:`INVALID AUTHORIZATION SPECIFICATION` })
@@ -162,7 +158,7 @@ class  Database
                     {
                         if ( typeof result === undefined ) resolve([])
 
-                        logger.log_query(sql)
+                        new logger().log_query(sql)
                         resolve(result.rows)
                     }
                 })
@@ -175,10 +171,7 @@ class  Database
         else
         {
             console.log(`To you use some database you need to set up it's configuration on you ".env" file`)
-            return {
-                code: `ERR`,
-                message:`Database configuration error!`
-            }
+            return { code: `ERR`, message:`Database configuration error!` }
         }
     }
 }

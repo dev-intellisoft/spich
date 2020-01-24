@@ -11,6 +11,9 @@ import helmet from 'helmet'
 import bodyParser from 'body-parser'
 import https from 'spdy'
 import http from 'http'
+import oauthserver from 'oauth2-server'
+import PGOAuth2Model from "./oauth-pg";
+
 
 class framework
 {
@@ -29,11 +32,11 @@ class framework
             const port = process.env.server_port || 443
 
             const credentials =
-                {
-                    key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
-                    cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
-                    passphrase: process.env.ssl_pass
-                }
+            {
+                key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
+                cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
+                passphrase: process.env.ssl_pass
+            }
 
             const https_server = https.createServer(credentials, app) //added
 
@@ -56,31 +59,26 @@ class framework
             console.log(`#      Description ${process.env.server_name}                            #`)
             console.log(`#      The server is running on port ${port} in NO SSL Mode               #`)
             console.log(`######################################################################`)
-
-            console.log(`The server was started at port ${port}`)
         }
 
 
-        process.on(`uncaughtException`, (err) =>
-        {
-            console.error(err)
-            console.log(`Node NOT Exiting...`)
-        })
+        process.on(`uncaughtException`, (err) => console.error(err))
 
 
         if ( process.env.enable_oauth === `true` )
         {
             global.client_names = []
             const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM applications`)
+
             result.map(value => client_names.push(value.app_name))
 
-            const oauthserver = require('oauth2-server')
+            // const oauthserver = await import('oauth2-server')
             app.oauth = oauthserver(
-                {
-                    model: require(`${CORE_PATH}/oauth-pg`),
-                    grants: [`auth_code`, `password`, `refresh_token`],
-                    debug: true
-                })
+            {
+                model: PGOAuth2Model,
+                grants: [`auth_code`, `password`, `refresh_token`],
+                debug: true
+            })
 
             app.all(`/oauth/token`, app.oauth.grant())
 
