@@ -21,7 +21,7 @@ class Bootstrap
 
         if ( !config )
         {
-            res.set('Content-type','application/json')
+            res.set(`Content-type`, `application/json`)
             return res.json({code:100, message:`Server Error!`}).end()
         }
 
@@ -36,9 +36,9 @@ class Bootstrap
                 new logger().access(req, res)
 
                 if( Buffer.isBuffer(output) )
-                    res.set('Content-type','application/pdf')
+                    res.set(`Content-type`, `application/pdf`)
                 else
-                    res.set('Content-type','application/json')
+                    res.set(`Content-type`, `application/json`)
 
                 res.send(output).end()
             }
@@ -59,8 +59,8 @@ class Bootstrap
         const strip_comments = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
         const argument_names = /([^\s,]+)/g;
 
-        const fn_str = func.toString().replace(strip_comments, '');
-        let result = fn_str.slice(fn_str.indexOf('(')+1, fn_str.indexOf(')')).match(argument_names);
+        const fn_str = func.toString().replace(strip_comments, ``);
+        let result = fn_str.slice(fn_str.indexOf(`(`)+1, fn_str.indexOf(`)`)).match(argument_names);
 
         if(result === null) result = [];
 
