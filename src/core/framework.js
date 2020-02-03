@@ -13,6 +13,7 @@ import https from 'spdy'
 import http from 'http'
 import oauthserver from 'oauth2-server'
 import PGOAuth2Model from './oauth/oauth-pg'
+import MongoOAuth2Model from './oauth/oauth-mongo'
 import structure from './oauth/structure'
 
 class framework
@@ -32,11 +33,11 @@ class framework
             const port = process.env.server_port || 443
 
             const credentials =
-                {
-                    key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
-                    cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
-                    passphrase: process.env.ssl_pass
-                }
+            {
+                key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
+                cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
+                passphrase: process.env.ssl_pass
+            }
 
             const https_server = https.createServer(credentials, app) //added
 
@@ -67,34 +68,37 @@ class framework
 
         if ( process.env.enable_oauth === `true` )
         {
-
-            await new structure().create_application_sequence()
-            await new structure().create_application_table()
-            await new structure().grant_application_sequence_permission()
-            await new structure().grant_applicaition_table_permission()
-
-            await new structure().create_user_sequence()
-            await new structure().create_user_table()
-            await new structure().grant_user_sequence_permission()
-            await new structure().grant_user_table_permission()
-
-            await new structure().create_access_token_table()
-            await new structure().grant_access_token_table_permission()
-
-            await new structure().create_refresh_token_table()
-            await new structure().grant_refresh_token_permission()
+            await new structure().init()
 
             global.client_names = []
-            const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.db_schema || `public`}.applications`)
 
-            result.map(value => client_names.push(value.app_name))
+            if ( process.env.db_type === `mongo` )
+            {
 
-            app.oauth = oauthserver(
+                const result = await MongoOAuth2Model.load_applications()
+
+                result.map(value => client_names.push(value.app_name))
+
+                app.oauth = oauthserver(
                 {
-                    model: new PGOAuth2Model(),
+                    model: MongoOAuth2Model,
                     grants: [`auth_code`, `password`, `refresh_token`],
                     debug: true
                 })
+            }
+            else if ( process.env.db_type === `postgres` )
+            {
+                const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.db_schema || `public`}.applications`)
+
+                result.map(value => client_names.push(value.app_name))
+
+                app.oauth = oauthserver(
+                    {
+                        model: new PGOAuth2Model(),
+                        grants: [`auth_code`, `password`, `refresh_token`],
+                        debug: true
+                    })
+            }
 
             app.all(`/oauth/token`, app.oauth.grant())
 

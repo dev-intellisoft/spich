@@ -27,7 +27,7 @@ class PGOAuth2Model
 
     grantTypeAllowed = async ( client_id, grant_type, callback ) =>
     {
-        if ( grant_type === 'password' || grant_type === 'refresh_token' )
+        if ( grant_type === `password` || grant_type === `refresh_token` )
             return callback(false, client_names.indexOf(client_id.toLowerCase()) >= 0)
 
         callback(false, true);
@@ -90,7 +90,8 @@ class PGOAuth2Model
             FROM 
                 ${process.env.db_schema || `public`}.applications 
             WHERE 
-                app_name = '${client_id}'`
+                app_name = '${client_id}'
+        `
         const result = await new Database().query(sql)
         if(!result.error) callback(null, result)
         else callback(result, false)
@@ -107,7 +108,7 @@ class PGOAuth2Model
                 ${process.env.db_schema || `public`}.users u 
             ON 
                 u.user_id = at.user_id
-             WHERE 
+            WHERE 
                 access_token = '${bearer_token}'
         `
         const result = await new Database().query(sql)
@@ -127,6 +128,26 @@ class PGOAuth2Model
                 app_id: result[0].app_id
             })
         }
+    }
+
+    getRefreshToken = async ( bearer_token, callback ) =>
+    {
+        const sql = `
+            SELECT 
+                refresh_token, app, expires, user_id 
+            FROM 
+                ${process.env.db_schema || `public`}.refresh_tokens 
+            WHERE 
+                refresh_token = '${bearer_token}'
+        `
+        const result = await new Database().query(sql)
+        callback(null, result.length ?
+        {
+            userId: result[0].user_id,
+            clientId: result[0].app,
+            expires: result[0].expires,
+            refreshToken: result[0].refresh_token,
+        } : false)
     }
 }
 

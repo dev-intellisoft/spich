@@ -29,6 +29,7 @@ class Router
             if( req.path.startsWith(key) )
                 route_to = routes[key]
         let regex = new RegExp(`{\\*}`)
+
         return regex.test(route_to)
     }
 
@@ -129,8 +130,6 @@ class Router
                     params[param_keys[i]] = param_values[i]
             }
 
-            console.log(`#####>`, params)
-
             global.parameters = params
 
             const input = new Input()
@@ -151,9 +150,6 @@ class Router
                 application_permission = !( assigned_applications !== undefined && assigned_applications.length && !assigned_applications.includes(client_id) )
                 permitted_applications = assigned_applications
             }
-
-            console.log( `Params ->`, params )
-            console.log( `Permitted applications ->`, permitted_applications )
 
             const config =
             {

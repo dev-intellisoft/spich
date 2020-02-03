@@ -38,8 +38,15 @@ class  Database
         if ( fs.existsSync(`${APP_PATH}/models/schemas/${collection}.js`) )
         {
             const s = await import(`${APP_PATH}/models/schemas/${collection}.js`)
-            const Schema = new mongoose.Schema(s.model())
-            models[`${collection}`] = mongoose.model(collection, Schema)
+            const schema = new mongoose.Schema(s.schema())
+            models[`${collection}`] = mongoose.model(collection, schema)
+            return models[`${collection}`]
+        }
+        else if ( fs.existsSync(`${process.env.PWD}/node_modules/spich/src/core/models/schemas/${collection}.js`) )
+        {
+            const s = await import(`./models/schemas/${collection}.js`)
+            const schema = new mongoose.Schema(s.schema())
+            models[`${collection}`] = mongoose.model(collection, schema)
             return models[`${collection}`]
         }
     }
@@ -138,7 +145,7 @@ class  Database
                 {
                     console.log(e)
                     console.log(client)
-                });
+                })
 
                 pool.query(sql, (err, result) =>
                 {

@@ -1,14 +1,16 @@
 import Database from '../database'
+import mongoose from 'mongoose'
+
 class structure
 {
-    create_application_sequence = async () => new Database().query(`
+    create_application_sequence = async () => await new Database().query(`
         CREATE SEQUENCE IF NOT EXISTS ${process.env.db_schema || `public`}.app_id_seq
         INCREMENT 1
         MAXVALUE 9223372036854775807
         CACHE 1
     `)
 
-    create_application_table = async () => new Database().query(`
+    create_application_table = async () => await new Database().query(`
         CREATE TABLE IF NOT EXISTS ${process.env.db_schema || `public`}.applications
         (
             app_id integer NOT NULL DEFAULT nextval('app_id_seq'::regclass),
@@ -21,11 +23,11 @@ class structure
         )
     `)
 
-    grant_applicaition_table_permission = async () => new Database().query(`
+    grant_applicaition_table_permission = async () => await new Database().query(`
         ALTER TABLE ${process.env.db_schema || `public`}.applications OWNER to ${process.env.db_user}
     `)
 
-    grant_application_sequence_permission = async () => new Database().query(`
+    grant_application_sequence_permission = async () => await new Database().query(`
         ALTER SEQUENCE nfe.app_id_seq OWNER TO ${process.env.db_user}
     `)
 
@@ -47,15 +49,15 @@ class structure
         )
     `)
 
-    grant_user_table_permission = async () => new Database().query(`
+    grant_user_table_permission = async () => await new Database().query(`
         ALTER TABLE ${process.env.db_schema || `public`}.users OWNER to ${process.env.db_user}
     `)
 
-    grant_user_sequence_permission = async () => new Database().query(`
+    grant_user_sequence_permission = async () => await new Database().query(`
         ALTER SEQUENCE IF EXISTS ${process.env.db_schema || `public`}.user_id_seq OWNER TO ${process.env.db_user}
     `)
 
-    create_access_token_table = async () => new Database().query(`
+    create_access_token_table = async () => await new Database().query(`
         CREATE TABLE IF NOT EXISTS ${process.env.db_schema || `public`}.access_tokens
         (
             access_token text COLLATE pg_catalog."default" NOT NULL,
@@ -74,11 +76,11 @@ class structure
         )
     `)
 
-    grant_access_token_table_permission = async () => new Database().query(`
+    grant_access_token_table_permission = async () => await new Database().query(`
         ALTER TABLE ${process.env.db_schema || `public`}.access_tokens OWNER to ${process.env.db_user};
     `)
 
-    create_refresh_token_table = async () => new Database().query(`
+    create_refresh_token_table = async () => await new Database().query(`
         CREATE TABLE IF NOT EXISTS ${process.env.db_schema || `public`}.refresh_tokens
         (
             app_id integer NOT NULL,
@@ -89,9 +91,111 @@ class structure
         )
     `)
 
-    grant_refresh_token_permission = async () => new Database().query(`
+    grant_refresh_token_permission = async () => await new Database().query(`
         ALTER TABLE ${process.env.db_schema || `public`}.refresh_tokens OWNER to ${process.env.db_user};
     `)
+
+    create_test_user = async () => await new Database().query(`
+        INSERT INTO ${process.env.db_schema || `public`}.users
+            ( username, email, password )
+        SELECT 'test', 'test@test.com', MD5('test')
+        WHERE
+            NOT EXISTS (
+                SELECT user_id FROM ${process.env.db_schema || `public`}.users 
+                WHERE username = 'test' AND email = 'test@test.com'
+            );
+    `)
+
+    create_test_application = async () => await  new Database().query(`
+        INSERT INTO 
+            ${process.env.db_schema || `public`}.applications( app_name, app_secret, description ) 
+        SELECT 'test', MD5('test'), 'test' WHERE NOT EXISTS 
+        (
+            SELECT app_id from ${process.env.db_schema || `public`}.applications 
+            WHERE app_name = 'test'
+        )
+    `)
+
+    init = async () =>
+    {
+        if ( process.env.db_type === `mongo` )
+        {
+            mongoose.connect(process.env.mongo_uri, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            })
+
+            mongoose.connection.on(`open`, async () =>
+            {
+                let result = []
+                const collections = await mongoose.connection.db.listCollections().toArray()
+
+                collections.map(coll => result.push(coll.name))
+
+                if ( result.indexOf(`applications`) === -1 )
+                {
+                    const applications = mongoose.model( `applications`, new mongoose.Schema(
+                        {
+                            "app_name":"String",
+                            "app_secret":"String" ,
+                            "redirect_url":"String",
+                            "description":"String"
+                        }))
+
+                    new applications(
+                        {
+                            "app_name":"test",
+                            "app_secret":"test",
+                            "redirect_url":"test",
+                            "description":"test"
+                        }).save()
+                }
+
+                if ( result.indexOf(`users`) === -1 )
+                {
+                    const users = mongoose.model( `users`, new mongoose.Schema({
+                        "username":"String",
+                        "email":"String",
+                        "password":"String"
+                    }))
+
+                    new users(
+                        {
+                            "username":"test",
+                            "email":"test@test.com",
+                            "password":"test"
+                        }).save()
+                }
+
+                if ( result.indexOf(`access_tokens`) === -1 )
+                    await mongoose.connection.db.createCollection(`access_tokens`)
+
+                if ( result.indexOf(`refresh_tokens`) === -1 )
+                    await mongoose.connection.db.createCollection(`refresh_tokens`)
+            })
+        }
+        else if ( process.env.db_type === `postgres` )
+        {
+            await this.create_application_sequence()
+            await this.create_application_table()
+            await this.grant_application_sequence_permission()
+            await this.grant_applicaition_table_permission()
+
+            await this.create_user_sequence()
+            await this.create_user_table()
+            await this.grant_user_sequence_permission()
+            await this.grant_user_table_permission()
+
+            await this.create_access_token_table()
+            await this.grant_access_token_table_permission()
+
+            await this.create_refresh_token_table()
+            await this.grant_refresh_token_permission()
+
+            await this.create_test_application()
+            await this.create_test_user()
+        }
+    }
 }
 
 export default structure
