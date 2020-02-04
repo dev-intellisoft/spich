@@ -28,16 +28,17 @@ class MongoOAuth2Model
     {
         const result = await new Database().select( `refresh_tokens`, { refresh_token } )
         callback(null, result.length ?
-            {
-                userId: result[0].user_id,
-                clientId: result[0].app,
-                expires: result[0].expires,
-                refreshToken: result[0].refresh_token,
-            } : false)
+        {
+            userId: result[0].user_id,
+            clientId: result[0].app_name,
+            expires: result[0].expires,
+            refreshToken: result[0].refresh_token,
+        } : false)
     }
 
     saveRefreshToken = async ( refresh_token, app_name, expires, user_id, callback ) =>
     {
+        user_id = user_id.id?user_id.id:user_id
         const data = await new Database().insert( `refresh_tokens`, { refresh_token, app_name, user_id, expires } )
         if( data ) callback(null, data)
         else callback(true, false)
@@ -45,6 +46,7 @@ class MongoOAuth2Model
 
     saveAccessToken = async (access_token, app_name, expires, user_id, callback) =>
     {
+        user_id = user_id.id?user_id.id:user_id
         const data = await new Database().insert( `access_tokens`, { access_token, app_name, user_id, expires } )
         if( data ) callback(null, data)
         else callback(true, false)

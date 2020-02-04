@@ -15,6 +15,7 @@ import oauthserver from 'oauth2-server'
 import PGOAuth2Model from './oauth/oauth-pg'
 import MongoOAuth2Model from './oauth/oauth-mongo'
 import structure from './oauth/structure'
+import socketio from 'socket.io'
 
 class framework
 {
@@ -28,6 +29,8 @@ class framework
         app.use(bodyParser.json())
         app.use(bodyParser.urlencoded({extended: false}))
 
+        global.connections = 0
+
         if ( process.env.ssl === `true` )
         {
             const port = process.env.server_port || 443
@@ -39,7 +42,7 @@ class framework
                 passphrase: process.env.ssl_pass
             }
 
-            const https_server = https.createServer(credentials, app) //added
+            var https_server = https.createServer(credentials, app) //added
 
             https_server.listen(port)
             console.log(`######################################################################`)
@@ -52,7 +55,7 @@ class framework
         {
             const port = process.env.server_port || 80
 
-            const http_server = http.createServer(app)
+            var http_server = http.createServer(app)
             http_server.listen(port)
 
             console.log(`######################################################################`)
@@ -61,6 +64,27 @@ class framework
             console.log(`#      The server is running on port ${port} in NO SSL Mode               #`)
             console.log(`######################################################################`)
         }
+
+
+        global.io = socketio(http_server)
+
+        io.on('connection', (socket) =>
+        {
+            connections = socket.client.conn.server.clientsCount
+            console.clear()
+            console.log(`Connections +# ${connections} `)
+
+            console.log()
+        })
+
+        io.on('disconnect', () =>
+        {
+            connections --
+            console.clear()
+            console.log(`Connections -# ${connections} `)
+        })
+
+
 
 
         process.on(`uncaughtException`, (err) => console.error(err))
@@ -93,11 +117,11 @@ class framework
                 result.map(value => client_names.push(value.app_name))
 
                 app.oauth = oauthserver(
-                    {
-                        model: new PGOAuth2Model(),
-                        grants: [`auth_code`, `password`, `refresh_token`],
-                        debug: true
-                    })
+                {
+                    model: new PGOAuth2Model(),
+                    grants: [`auth_code`, `password`, `refresh_token`],
+                    debug: true
+                })
             }
 
             app.all(`/oauth/token`, app.oauth.grant())
