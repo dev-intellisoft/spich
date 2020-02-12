@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import Database from '../database'
+import bcrypt from 'bcryptjs'
 
 class MongoOAuth2Model
 {
@@ -14,13 +15,13 @@ class MongoOAuth2Model
         else
         {
             callback(null,
-            {
-                accessToken: data[0].access_token,
-                clientId: data[0].app_name,
-                expires: data[0].expires,
-                user_id: data[0].user_id,
-                app_id: data[0].app_id
-            })
+                {
+                    accessToken: data[0].access_token,
+                    clientId: data[0].app_name,
+                    expires: data[0].expires,
+                    user_id: data[0].user_id,
+                    app_id: data[0].app_id
+                })
         }
     }
 
@@ -28,17 +29,17 @@ class MongoOAuth2Model
     {
         const result = await new Database().select( `refresh_tokens`, { refresh_token } )
         callback(null, result.length ?
-        {
-            userId: result[0].user_id,
-            clientId: result[0].app_name,
-            expires: result[0].expires,
-            refreshToken: result[0].refresh_token,
-        } : false)
+            {
+                userId: result[0].user_id,
+                clientId: result[0].app_name,
+                expires: result[0].expires,
+                refreshToken: result[0].refresh_token,
+            } : false)
     }
 
     saveRefreshToken = async ( refresh_token, app_name, expires, user_id, callback ) =>
     {
-        user_id = user_id.id?user_id.id:user_id
+        user_id = typeof user_id.id === `string`?user_id.id:user_id
         const data = await new Database().insert( `refresh_tokens`, { refresh_token, app_name, user_id, expires } )
         if( data ) callback(null, data)
         else callback(true, false)
@@ -46,7 +47,7 @@ class MongoOAuth2Model
 
     saveAccessToken = async (access_token, app_name, expires, user_id, callback) =>
     {
-        user_id = user_id.id?user_id.id:user_id
+        user_id = typeof user_id.id === `string`?user_id.id:user_id
         const data = await new Database().insert( `access_tokens`, { access_token, app_name, user_id, expires } )
         if( data ) callback(null, data)
         else callback(true, false)
@@ -54,8 +55,11 @@ class MongoOAuth2Model
 
     getUser = async  ( email, password, callback ) =>
     {
-        const user = await new Database().select( `users`, { email, password } )
-        if( user.length ) return callback(null, user[0]._id)
+        const user = await new Database().select( `users`, { email }, true )
+
+        if( await bcrypt.compare(password, user.password) )
+            return callback(null, user._id)
+
         return callback({ code:1, message:`some err had occured! ` })
     }
 

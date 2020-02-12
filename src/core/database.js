@@ -51,12 +51,16 @@ class  Database
         }
     }
 
-    select = async ( collection, where={} ) =>
+    select = async ( collection, where={}, one = false ) =>
     {
         try
         {
             const model = await this.load(collection)
-            return await model.find(where)
+
+            if (one)
+                return await model.findOne(where)
+            else
+                return await model.find(where)
         }
         catch (e)
         {
@@ -130,14 +134,14 @@ class  Database
                     logger.error(`It seems you have no database set in your '.env' file blank will be taken`)
 
                 const config =
-                {
-                    user:user,
-                    password:pass,
-                    host:host,
-                    database:base,
-                    max:10,
-                    idleTimeoutMillis: 1000,
-                }
+                    {
+                        user:user,
+                        password:pass,
+                        host:host,
+                        database:base,
+                        max:10,
+                        idleTimeoutMillis: 1000,
+                    }
 
                 const pool = new Pool(config)
 
