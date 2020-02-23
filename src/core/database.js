@@ -51,12 +51,16 @@ class  Database
         }
     }
 
-    select = async ( collection, where={} ) =>
+    select = async ( collection, where={}, one = false ) =>
     {
         try
         {
             const model = await this.load(collection)
-            return await model.find(where)
+
+            if (one)
+                return await model.findOne(where)
+            else
+                return await model.find(where)
         }
         catch (e)
         {
