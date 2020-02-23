@@ -6,6 +6,7 @@ class MongoOAuth2Model
 {
     getAccessToken = async (access_token, callback) =>
     {
+       
         const data = await new Database().select( `access_tokens`, { access_token } )
 
         if (!data[0])
@@ -15,13 +16,13 @@ class MongoOAuth2Model
         else
         {
             callback(null,
-                {
-                    accessToken: data[0].access_token,
-                    clientId: data[0].app_name,
-                    expires: data[0].expires,
-                    user_id: data[0].user_id,
-                    app_id: data[0].app_id
-                })
+            {
+                accessToken: data[0].access_token,
+                clientId: data[0].app_name,
+                expires: data[0].expires,
+                user_id: data[0].user_id,
+                app_id: data[0].app_id
+            })
         }
     }
 
@@ -29,12 +30,12 @@ class MongoOAuth2Model
     {
         const result = await new Database().select( `refresh_tokens`, { refresh_token } )
         callback(null, result.length ?
-            {
-                userId: result[0].user_id,
-                clientId: result[0].app_name,
-                expires: result[0].expires,
-                refreshToken: result[0].refresh_token,
-            } : false)
+        {
+            userId: result[0].user_id,
+            clientId: result[0].app_name,
+            expires: result[0].expires,
+            refreshToken: result[0].refresh_token,
+        } : false)
     }
 
     saveRefreshToken = async ( refresh_token, app_name, expires, user_id, callback ) =>
@@ -56,10 +57,10 @@ class MongoOAuth2Model
     getUser = async  ( email, password, callback ) =>
     {
         const user = await new Database().select( `users`, { email }, true )
-
+        
         if( await bcrypt.compare(password, user.password) )
             return callback(null, user._id)
-
+        
         return callback({ code:1, message:`some err had occured! ` })
     }
 
