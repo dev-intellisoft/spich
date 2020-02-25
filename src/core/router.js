@@ -8,23 +8,31 @@ let routes = []
 
 class Router
 {
-    constructor()
+
+    static_routes = async () =>
     {
         try
         {
             if (fs.existsSync(`${APP_PATH}/.conf/routes.json`))
-                routes = require(`${APP_PATH}/.conf/routes.json`)
+            {
+                routes = await import(`${APP_PATH}/.conf/routes.json`)
+
+                if ( routes.default !== undefined )
+                    routes = routes.default
+            }
         }
         catch (e)
         {
             console.log(e)
-            console.log(`Error: Can not find '${APP_PATH}/register.js'`)
+            console.log(`Error: Can not find '${APP_PATH}/.conf/routes.json'`)
         }
     }
 
-    is_public = req =>
+    is_public = async req =>
     {
+        await this.static_routes()
         let route_to = req.path
+
         for (let key in routes)
             if( req.path.startsWith(key) )
                 route_to = routes[key]
@@ -37,6 +45,7 @@ class Router
 
     router = async ( req ) =>
     {
+        await this.static_routes()
 
         let params = {}
         let route_to = req.path
