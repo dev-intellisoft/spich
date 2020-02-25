@@ -126,21 +126,21 @@ class framework
 
             app.all(`/oauth/token`, app.oauth.grant())
 
-            app.all(`*`,  (req, res, next) =>
+            app.all(`*`,  async (req, res, next) =>
             {
-                if (new Bootstrap().is_public_route(req) || new Bootstrap().is_static_route(req))
-                    new Bootstrap().run(req, res)
+                if (await new Bootstrap().is_public_route(req) || await new Bootstrap().is_static_route(req))
+                    await new Bootstrap().run(req, res)
                 else
                     next()
             })
 
-            app.all(/^(?:(?!\/?.*uploads).*)/, app.oauth.authorise(), (req, res) => new Bootstrap().run(req, res))
+            app.all(/^(?:(?!\/?.*uploads).*)/, app.oauth.authorise(), async (req, res) => await new Bootstrap().run(req, res))
 
-            app.use(app.oauth.errorHandler());
+            app.use(app.oauth.errorHandler())
         }
         else
         {
-            app.all(`*`,  (req, res) => new Bootstrap().run(req, res))
+            app.all(`*`,  async (req, res) => await new Bootstrap().run(req, res))
         }
     }
 }
