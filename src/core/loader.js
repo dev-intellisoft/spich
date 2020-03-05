@@ -4,7 +4,7 @@
 
 
 import loadable from './loadable'
-
+import logger from './logger'
 class Loader
 {
     model = model_name =>
@@ -15,7 +15,7 @@ class Loader
         }
         catch ( e )
         {
-            console.log(`Can not find model '${model_name}'`, e)
+            new logger().error(e)
         }
     }
 
@@ -27,7 +27,7 @@ class Loader
         }
         catch ( e )
         {
-            console.log(`Can not find controller '${controller_name}'`, e)
+            new logger().error(e)
         }
     }
 
@@ -39,7 +39,7 @@ class Loader
         }
         catch ( e )
         {
-            console.log(`Can not find library '${library_name}'`, e)
+            new logger().error(e)
         }
     }
 
@@ -51,7 +51,7 @@ class Loader
         }
         catch ( e )
         {
-            console.log(`Can not find class '${class_name}'`, e)
+            new logger().error(e)
         }
     }
 
@@ -69,7 +69,7 @@ class Loader
         }
         catch ( e )
         {
-            console.log(`Can not find view '${view_name}'`, e)
+            new logger().error(e)
         }
     }
 

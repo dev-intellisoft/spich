@@ -1,86 +1,145 @@
-import mongoose from 'mongoose'
 import Database from '../database'
 import bcrypt from 'bcryptjs'
+import logger from '../logger'
 
 class MongoOAuth2Model
 {
     getAccessToken = async (access_token, callback) =>
     {
-       
-        const data = await new Database().select( `access_tokens`, { access_token } )
+        try
+        {
+            const data = await new Database().select( `access_tokens`, { access_token } )
 
-        if (!data[0])
-        {
-            callback(data)
-        }
-        else
-        {
-            callback(null,
+            if (!data[0])
             {
-                accessToken: data[0].access_token,
-                clientId: data[0].app_name,
-                expires: data[0].expires,
-                user_id: data[0].user_id,
-                app_id: data[0].app_id
-            })
+                callback(data)
+            }
+            else
+            {
+                callback(null,
+                    {
+                        accessToken: data[0].access_token,
+                        clientId: data[0].app_name,
+                        expires: data[0].expires,
+                        user_id: data[0].user_id,
+                        app_id: data[0].app_id
+                    })
+            }
+        }
+        catch ( e )
+        {
+            new logger().error(e)
         }
     }
 
     getRefreshToken = async ( refresh_token, callback ) =>
     {
-        const result = await new Database().select( `refresh_tokens`, { refresh_token } )
-        callback(null, result.length ?
+        try
         {
-            userId: result[0].user_id,
-            clientId: result[0].app_name,
-            expires: result[0].expires,
-            refreshToken: result[0].refresh_token,
-        } : false)
+            const result = await new Database().select( `refresh_tokens`, { refresh_token } )
+            callback(null, result.length ?
+                {
+                    userId: result[0].user_id,
+                    clientId: result[0].app_name,
+                    expires: result[0].expires,
+                    refreshToken: result[0].refresh_token,
+                } : false)
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
     }
 
     saveRefreshToken = async ( refresh_token, app_name, expires, user_id, callback ) =>
     {
-        user_id = typeof user_id.id === `string`?user_id.id:user_id
-        const data = await new Database().insert( `refresh_tokens`, { refresh_token, app_name, user_id, expires } )
-        if( data ) callback(null, data)
-        else callback(true, false)
+        try
+        {
+            user_id = typeof user_id.id === `string`?user_id.id:user_id
+            const data = await new Database().insert( `refresh_tokens`, { refresh_token, app_name, user_id, expires } )
+            if( data ) callback(null, data)
+            else callback(true, false)
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
     }
 
     saveAccessToken = async (access_token, app_name, expires, user_id, callback) =>
     {
-        user_id = typeof user_id.id === `string`?user_id.id:user_id
-        const data = await new Database().insert( `access_tokens`, { access_token, app_name, user_id, expires } )
-        if( data ) callback(null, data)
-        else callback(true, false)
+        try
+        {
+            user_id = typeof user_id.id === `string`?user_id.id:user_id
+            const data = await new Database().insert( `access_tokens`, { access_token, app_name, user_id, expires } )
+            if( data ) callback(null, data)
+            else callback(true, false)
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
     }
 
     getUser = async  ( email, password, callback ) =>
     {
-        const user = await new Database().select( `users`, { email }, true )
-        
-        if( await bcrypt.compare(password, user.password) )
-            return callback(null, user._id)
-        
-        return callback({ code:1, message:`some err had occured! ` })
+        try
+        {
+            const user = await new Database().select( `users`, { email }, true )
+
+            if( await bcrypt.compare(password, user.password) )
+                return callback(null, user._id)
+
+            return callback({ code:1, message:`some err had occured! ` })
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
     }
 
     getClient = async ( app_name, app_secret, callback ) =>
     {
-        const client = await new Database().select(`applications`, { app_name, app_secret })
-        if ( client.length )
-            callback(null, { clientId: client[0].app_name, clientSecret: client[0].app_secret })
-        else
-            return callback(result)
+        try
+        {
+            const client = await new Database().select(`applications`, { app_name, app_secret })
+            if ( client.length )
+                callback(null, { clientId: client[0].app_name, clientSecret: client[0].app_secret })
+            else
+                return callback(result)
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
     }
 
     grantTypeAllowed = async  ( client_name, grant_type, callback ) =>
     {
-        if ( grant_type === `password` || grant_type === `refresh_token` )
-            return callback(false, client_names.indexOf(client_name) >= 0)
-        callback(false, true)
+        try
+        {
+            if ( grant_type === `password` || grant_type === `refresh_token` )
+                return callback(false, client_names.indexOf(client_name) >= 0)
+            callback(false, true)
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
     }
 
-    load_applications = async () => await new Database().select(`applications`)
+    load_applications = async () =>
+    {
+        try
+        {
+            return await new Database().select(`applications`)
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
+
+    }
 }
 
 export default new MongoOAuth2Model()

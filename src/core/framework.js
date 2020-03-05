@@ -16,131 +16,139 @@ import PGOAuth2Model from './oauth/oauth-pg'
 import MongoOAuth2Model from './oauth/oauth-mongo'
 import structure from './oauth/structure'
 import socketio from 'socket.io'
+import logger from './logger'
 
 class framework
 {
     async run()
     {
-        const app = express()
-        app.use(helmet())
-        app.disable(`x-powered-by`)
-        app.set(`trust_proxy`, true);
-        app.use(cors())
-        app.use(bodyParser.json())
-        app.use(bodyParser.urlencoded({extended: false}))
-
-        global.connections = 0
-
-        if ( process.env.ssl === `true` )
+        try
         {
-            const port = process.env.server_port || 443
+            const app = express()
+            app.use(helmet())
+            app.disable(`x-powered-by`)
+            app.set(`trust_proxy`, true);
+            app.use(cors())
+            app.use(bodyParser.json())
+            app.use(bodyParser.urlencoded({extended: false}))
 
-            const credentials =
+            global.connections = 0
+
+            if ( process.env.ssl === `true` )
             {
-                key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
-                cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
-                passphrase: process.env.ssl_pass
+                const port = process.env.server_port || 443
+
+                const credentials =
+                    {
+                        key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
+                        cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
+                        passphrase: process.env.ssl_pass
+                    }
+
+                var https_server = https.createServer(credentials, app) //added
+
+                https_server.listen(port)
+                console.log(`######################################################################`)
+                console.log(`#                      Welcome  to ${process.env.server_api_name}                           #`)
+                console.log(`#      Description ${process.env.server_name}                            #`)
+                console.log(`#      The server is running on port ${port} in SSL Mode                 #`)
+                console.log(`######################################################################`)
+            }
+            else
+            {
+                const port = process.env.server_port || 80
+
+                var http_server = http.createServer(app)
+                http_server.listen(port)
+
+                console.log(`######################################################################`)
+                console.log(`#                      Welcome  to ${process.env.server_api_name}                           #`)
+                console.log(`#      Description ${process.env.server_name}                            #`)
+                console.log(`#      The server is running on port ${port} in NO SSL Mode               #`)
+                console.log(`######################################################################`)
             }
 
-            var https_server = https.createServer(credentials, app) //added
 
-            https_server.listen(port)
-            console.log(`######################################################################`)
-            console.log(`#                      Welcome  to ${process.env.server_api_name}                           #`)
-            console.log(`#      Description ${process.env.server_name}                            #`)
-            console.log(`#      The server is running on port ${port} in SSL Mode                 #`)
-            console.log(`######################################################################`)
-        }
-        else
-        {
-            const port = process.env.server_port || 80
+            global.io = socketio(http_server)
 
-            var http_server = http.createServer(app)
-            http_server.listen(port)
-
-            console.log(`######################################################################`)
-            console.log(`#                      Welcome  to ${process.env.server_api_name}                           #`)
-            console.log(`#      Description ${process.env.server_name}                            #`)
-            console.log(`#      The server is running on port ${port} in NO SSL Mode               #`)
-            console.log(`######################################################################`)
-        }
-
-
-        global.io = socketio(http_server)
-
-        io.on('connection', (socket) =>
-        {
-            connections = socket.client.conn.server.clientsCount
-            console.clear()
-            console.log(`Connections +# ${connections} `)
-
-            console.log()
-        })
-
-        io.on('disconnect', () =>
-        {
-            connections --
-            console.clear()
-            console.log(`Connections -# ${connections} `)
-        })
-
-
-
-
-        process.on(`uncaughtException`, (err) => console.error(err))
-
-
-        if ( process.env.enable_oauth === `true` )
-        {
-            await new structure().init()
-
-            global.client_names = []
-
-            if ( process.env.db_type === `mongo` )
+            io.on('connection', (socket) =>
             {
+                connections = socket.client.conn.server.clientsCount
+                console.clear()
+                console.log(`Connections +# ${connections} `)
 
-                const result = await MongoOAuth2Model.load_applications()
-
-                result.map(value => client_names.push(value.app_name))
-
-                app.oauth = oauthserver(
-                {
-                    model: MongoOAuth2Model,
-                    grants: [`auth_code`, `password`, `refresh_token`],
-                    debug: true
-                })
-            }
-            else if ( process.env.db_type === `postgres` )
-            {
-                const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.db_schema || `public`}.applications`)
-
-                result.map(value => client_names.push(value.app_name))
-
-                app.oauth = oauthserver(
-                {
-                    model: new PGOAuth2Model(),
-                    grants: [`auth_code`, `password`, `refresh_token`],
-                    debug: true
-                })
-            }
-
-            app.all(`/oauth/token`, app.oauth.grant())
-
-            app.all(`*`,  async (req, res, next) =>
-            {
-                if (await new Bootstrap().is_public_route(req) || await new Bootstrap().is_static_route(req))
-                    await new Bootstrap().run(req, res)
-                else
-                    next()
+                console.log()
             })
 
-            app.all(/^(?:(?!\/?.*uploads).*)/, app.oauth.authorise(), async (req, res) => await new Bootstrap().run(req, res))
+            io.on('disconnect', () =>
+            {
+                connections --
+                console.clear()
+                console.log(`Connections -# ${connections} `)
+            })
 
-            app.use(app.oauth.errorHandler())
+
+
+
+            process.on(`uncaughtException`, (err) => console.error(err))
+
+
+            if ( process.env.enable_oauth === `true` )
+            {
+                await new structure().init()
+
+                global.client_names = []
+
+                if ( process.env.db_type === `mongo` )
+                {
+
+                    const result = await MongoOAuth2Model.load_applications()
+
+                    result.map(value => client_names.push(value.app_name))
+
+                    app.oauth = oauthserver(
+                        {
+                            model: MongoOAuth2Model,
+                            grants: [`auth_code`, `password`, `refresh_token`],
+                            debug: true
+                        })
+                }
+                else if ( process.env.db_type === `postgres` )
+                {
+                    const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.db_schema || `public`}.applications`)
+
+                    result.map(value => client_names.push(value.app_name))
+
+                    app.oauth = oauthserver(
+                        {
+                            model: new PGOAuth2Model(),
+                            grants: [`auth_code`, `password`, `refresh_token`],
+                            debug: true
+                        })
+                }
+
+                app.all(`/oauth/token`, app.oauth.grant())
+
+                app.all(`*`,  async (req, res, next) =>
+                {
+                    if (await new Bootstrap().is_public_route(req) || await new Bootstrap().is_static_route(req))
+                        await new Bootstrap().run(req, res)
+                    else
+                        next()
+                })
+
+                app.all(/^(?:(?!\/?.*uploads).*)/, app.oauth.authorise(), async (req, res) => await new Bootstrap().run(req, res))
+
+                app.use(app.oauth.errorHandler())
+            }
+            else
+            {
+                app.all(`*`,  async (req, res) => await new Bootstrap().run(req, res))
+            }
         }
-        else
+        catch ( e )
         {
-            app.all(`*`,  async (req, res) => await new Bootstrap().run(req, res))
+            new logger().error(e)
         }
     }
 }

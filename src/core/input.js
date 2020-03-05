@@ -2,77 +2,113 @@
  * Created by wellington on 15/11/2017.
  */
 
+import logger from './logger'
+
 class Input
 {
     post = key =>
     {
-
-        if(typeof key === 'object')
+        try
         {
-            for (const blah in key) request.body[`${blah}`] = key[blah]
+            if(typeof key === 'object')
+            {
+                for (const blah in key) request.body[`${blah}`] = key[blah]
+            }
+            else
+            {
+                if(!key)  return request.body
+                else return request.body[`${key}`]
+            }
         }
-        else
+        catch ( e )
         {
-            if(!key)  return request.body
-            else return request.body[`${key}`]
+            new logger().error(e)
         }
     }
 
     put = key =>
     {
-        if(typeof key === 'object')
+        try
         {
-            for (const blah in key) request.body[`${blah}`] = key[blah]
+            if(typeof key === 'object')
+            {
+                for (const blah in key) request.body[`${blah}`] = key[blah]
+            }
+            else
+            {
+                if(!key)  return request.body
+                else return request.body[`${key}`]
+            }
         }
-        else
+        catch ( e )
         {
-            if(!key)  return request.body
-            else return request.body[`${key}`]
+            new logger().error(e)
         }
     }
 
     get = key =>
     {
-        if(typeof key === 'object')
+        try
         {
-            for (const blah in key) request.query[`${blah}`] = key[blah]
+            if(typeof key === 'object')
+            {
+                for (const blah in key) request.query[`${blah}`] = key[blah]
+            }
+            else
+            {
+                if(!key)  return request.query
+                else return request.query[`${key}`]
+            }
         }
-        else
+        catch ( e )
         {
-            if(!key)  return request.query
-            else return request.query[`${key}`]
+            new logger().error(e)
         }
     }
 
     params = key =>
     {
-        if(typeof key === 'object')
+        try
         {
-            for (const blah in key) parameters[`${blah}`] = key[blah]
+            if(typeof key === 'object')
+            {
+                for (const blah in key) parameters[`${blah}`] = key[blah]
+            }
+            else
+            {
+                if(!key)  return parameters
+                else return parameters[`${key}`]
+            }
         }
-        else
+        catch ( e )
         {
-            if(!key)  return parameters
-            else return parameters[`${key}`]
+            new logger().error(e)
         }
     }
 
     oauth = key =>
     {
-        if(typeof key === 'object')
+        try
         {
-            for (const blah in key) request.oauth.bearerToken[`${blah}`] = key[blah]
-        }
-        else
-        {
-            if(!key)
+            if(typeof key === 'object')
             {
-                return request.oauth !== undefined? request.oauth.bearerToken: undefined
+                for (const blah in key) request.oauth.bearerToken[`${blah}`] = key[blah]
             }
             else
             {
-                return request.oauth !== undefined? request.oauth.bearerToken[`${key}`] : undefined
+                if(!key)
+                {
+                    return request.oauth !== undefined? request.oauth.bearerToken: undefined
+                }
+                else
+                {
+                    return request.oauth !== undefined? request.oauth.bearerToken[`${key}`] : undefined
+                }
             }
+        }
+        catch ( e )
+        {
+            new logger().error(e)
         }
     }
 

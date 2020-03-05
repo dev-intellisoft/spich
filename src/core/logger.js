@@ -10,7 +10,7 @@ const debug = process.env.debug || 0
 
 class logger
 {
-    access (req, res)
+    access = (req, res) =>
     {
         const access_token = req.oauth?req.oauth.bearerToken.accessToken: ``
         const log_format = `USERID=":userID"; IP=":ip"; XIP=":Xip"; HOST=":host"; METHOD=":method"; PROTO=":protocol"; URL=":url"; USERAGENT=":userAgent"; PERIOD[FROM=":startDate :startTime" TO=":endDate :endTime"]; CLF=":clfDate"; DELTA=":delta"; HTTP_VERSION=":httpVersion"; REFERER=":referer"; URL_DECODED=":urlDecoded"; LENGTH=":contentLength"; ACCESS_TOKEN="${access_token}" DATA="${JSON.stringify(req.body)}"`
@@ -22,50 +22,50 @@ class logger
         {
             if(debug > 0 || debug === `access`)
             {
-                console.log('')
-                console.log('################ Access Log ################')
+                console.log(``)
+                console.log(`################ Access Log ################`)
                 console.log(data)
-                console.log('')
+                console.log(``)
             }
 
-            fs.open(`${LOG_PATH}/access.log`, 'a', 666, ( e, id ) =>
-                fs.write( id, `${data}\n`, null, 'utf8', () =>
+            fs.open(`${LOG_PATH}/access.log`, `a`, 666, ( e, id ) =>
+                fs.write( id, `${data}\n`, null, `utf8`, () =>
                     fs.close(id, () => {})))
         })
     }
 
-    log_zoho_request( config )
+    log_zoho_request = ( config ) =>
     {
-        let method = config.method || 'GET'
+        const method = config.method || `GET`
         let url = config.url
-        let form = config.form || ''
-        let opp_access_token = config.opp_access_token || ''
+        let form = config.form || ``
+        let opp_access_token = config.opp_access_token || ``
 
         let data = `[${new Date()}] METHOD="${method}"; URL="${url}"; DATA="${form}"; ACCESS_TOKEN="${opp_access_token}";`
 
         if( debug > 0 || debug === `zoho` )
         {
-            console.log('')
-            console.log('################ Request Log ################')
+            console.log(``)
+            console.log(`################ Request Log ################`)
             console.log(data)
-            console.log('')
+            console.log(``)
         }
 
-        fs.open(`${LOG_PATH}/zoho.log`, 'a', 666, ( e, id ) =>
-            fs.write( id, `${data}\n`, null, 'utf8', () =>
+        fs.open(`${LOG_PATH}/zoho.log`, `a`, 666, ( e, id ) =>
+            fs.write( id, `${data}\n`, null, `utf8`, () =>
                 fs.close(id, () => {})))
     }
 
-    log_query( sql )
+    log_query = ( sql ) =>
     {
         let data = `[${new Date()}] ${sql}`
 
         if( debug > 0 || debug === `sql` )
         {
-            console.log('')
-            console.log('################ SQL Log ################')
+            console.log(``)
+            console.log(`################ SQL Log ################`)
             console.log(data)
-            console.log('')
+            console.log(``)
         }
 
         if ( !fs.existsSync(`${LOG_PATH}`) )
@@ -76,14 +76,14 @@ class logger
                 fs.close(id, () => {}) ))
     }
 
-    error( error )
+    error = ( error ) =>
     {
-        let data = `[${new Date()}] ${error}`
+        let data = `[${new Date()}] ${error.stack || error }`
 
         if( debug > 0 || debug === `error` )
         {
-            console.log('')
-            console.log('################ Error Log ################')
+            console.log(``)
+            console.log(`################ Error Log ################`)
             console.log(data)
             console.log('')
         }
