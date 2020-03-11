@@ -46,6 +46,26 @@ class Input
         }
     }
 
+    patch = key =>
+    {
+        try
+        {
+            if(typeof key === 'object')
+            {
+                for (const blah in key) request.body[`${blah}`] = key[blah]
+            }
+            else
+            {
+                if(!key)  return request.body
+                else return request.body[`${key}`]
+            }
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
+    }
+
     get = key =>
     {
         try

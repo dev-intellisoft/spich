@@ -3,4 +3,7 @@
  */
 import Input from './input'
 
-export default { input:Input }
+export default
+{
+    'input':Input
+}
