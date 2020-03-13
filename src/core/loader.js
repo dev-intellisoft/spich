@@ -5,6 +5,10 @@
 
 import loadable from './loadable'
 import logger from './logger'
+
+import mustache from  'mustache'
+import fs from 'fs'
+
 class Loader
 {
     model = model_name =>
@@ -60,8 +64,6 @@ class Loader
         try
         {
             if(!data)  data = {}
-            let mustache = require('mustache')
-            let fs = require('fs')
             let content = fs.readFileSync(`${VIEW_PATH}/${view_name}.html`, 'utf8');
 
             mustache.parse(content)
