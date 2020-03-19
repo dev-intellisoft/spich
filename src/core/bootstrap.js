@@ -56,8 +56,10 @@ class Bootstrap
                     const output = await _class[method]()
 
                     new logger().access(req, res)
-
-                    if( Buffer.isBuffer(output) )
+                    
+                    if (  Boolean(res.get(`html`)) )
+                        res.set(`Content-type`, `text/html`)
+                    else if( Buffer.isBuffer(output) )
                         res.set(`Content-type`, `application/pdf`)
                     else
                         res.set(`Content-type`, `application/json`)
