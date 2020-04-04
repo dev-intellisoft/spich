@@ -10,7 +10,7 @@ class Controller extends Loader
     constructor()
     {
         super()
-        this.load('input')
+        this.load(`input`)
     }
 
     is_post = () => (request.method === `POST`)

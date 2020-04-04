@@ -22,6 +22,10 @@ class framework
 {
     async run()
     {
+        global.CTL_PATH = `${APP_PATH}/controllers`
+        global.MOD_PATH = `${APP_PATH}/models`
+        global.LIB_PATH = `${APP_PATH}/libs`
+
         try
         {
             const app = express()
@@ -39,11 +43,11 @@ class framework
                 const port = process.env.server_port || 443
 
                 const credentials =
-                    {
-                        key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
-                        cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
-                        passphrase: process.env.ssl_pass
-                    }
+                {
+                    key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
+                    cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
+                    passphrase: process.env.ssl_pass
+                }
 
                 var https_server = https.createServer(credentials, app) //added
 
@@ -87,11 +91,7 @@ class framework
                 console.log(`Connections -# ${connections} `)
             })
 
-
-
-
             process.on(`uncaughtException`, (err) => console.error(err))
-
 
             if ( process.env.enable_oauth === `true` )
             {
@@ -101,17 +101,16 @@ class framework
 
                 if ( process.env.db_type === `mongo` )
                 {
-
                     const result = await MongoOAuth2Model.load_applications()
 
                     result.map(value => client_names.push(value.app_name))
 
                     app.oauth = oauthserver(
-                        {
-                            model: MongoOAuth2Model,
-                            grants: [`auth_code`, `password`, `refresh_token`],
-                            debug: true
-                        })
+                    {
+                        model: MongoOAuth2Model,
+                        grants: [`auth_code`, `password`, `refresh_token`],
+                        debug: true
+                    })
                 }
                 else if ( process.env.db_type === `postgres` )
                 {
@@ -120,11 +119,11 @@ class framework
                     result.map(value => client_names.push(value.app_name))
 
                     app.oauth = oauthserver(
-                        {
-                            model: new PGOAuth2Model(),
-                            grants: [`auth_code`, `password`, `refresh_token`],
-                            debug: true
-                        })
+                    {
+                        model: new PGOAuth2Model(),
+                        grants: [`auth_code`, `password`, `refresh_token`],
+                        debug: true
+                    })
                 }
 
                 app.all(`/oauth/token`, app.oauth.grant())

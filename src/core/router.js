@@ -75,7 +75,7 @@ class Router
             // check if some have some pre-assigned application set in the router.json
             let permitted_applications = route_to.substring(route_to.lastIndexOf(`{`)+1,route_to.lastIndexOf(`}`)).replace(/\s/g,`}`).split(`,`)
 
-            route_to = route_to.replace(/\{.*\}/, '') // remove the pre-assignment declaration from the variable to avoid fake route
+            route_to = route_to.replace(/\{.*\}/, ``) // remove the pre-assignment declaration from the variable to avoid fake route
 
             //todo check why this route is remove the last character of the route
             let argument = route_to.slice(0,route_to.indexOf(`:`)).split(`/`)
@@ -126,74 +126,68 @@ class Router
                 class_name = class_name.split(`/`).join(`_`)
             }
 
+            let ctl = await import(`${CTL_PATH}/${class_name}`)
 
-            if ( register[class_name] !== undefined )
+            if ( ctl.default ) ctl = ctl.default
+
+            const _controller = new ctl
+
+            if( route_to[ counter ] && typeof _controller[route_to[counter]] === `function` )
             {
-                const _class = new register[class_name]
-
-                if( route_to[ counter ] && typeof _class[route_to[counter]] === `function` )
-                {
-                    method = route_to[counter]
-                    url_params = url_params.replace( `${method}/`, `` )
-                    counter ++
-                    url_params = url_params.replace( method, `` )
-                }
-
-                if( typeof _class.params === `function` )
-                {
-                    let param_values = url_params.split(`/`)
-
-                    let param_keys = _class.params()
-                    for (let i = 0; i < param_keys.length; i ++)
-                        params[param_keys[i]] = param_values[i]
-                }
-
-                global.parameters = params
-
-                const input = new Input()
-
-                if ( input.oauth() )
-                    client_id = input.oauth(`clientId`).toLowerCase()
-
-                if ( permitted_applications[0] === `` )
-                    permitted_applications[0]  = `*`
-
-                if ( permitted_applications.includes(client_id) || permitted_applications[0] === `*` )
-                    application_permission = true
-
-                if ( register[class_name].assign )
-                {
-                    let assigned_applications = register[class_name].assign()
-
-                    application_permission = !( assigned_applications !== undefined && assigned_applications.length && !assigned_applications.includes(client_id) )
-                    permitted_applications = assigned_applications
-                }
-
-                const config =
-                    {
-                        _class:_class,
-                        folder:folder,
-                        controller:controller,
-                        class_name:class_name,
-                        method:method,
-                        permission:application_permission,
-                        applications:
-                            {
-                                allowed: permitted_applications,
-                                accessed:client_id
-                            },
-                        params:params
-                    }
-
-                return config
+                method = route_to[counter]
+                url_params = url_params.replace( `${method}/`, `` )
+                counter ++
+                url_params = url_params.replace( method, `` )
             }
-            else
+
+            if( typeof _controller.params === `function` )
             {
-                return null
+                let param_values = url_params.split(`/`)
+
+                let param_keys = _controller.params()
+                for (let i = 0; i < param_keys.length; i ++)
+                    params[param_keys[i]] = param_values[i]
             }
+
+            global.parameters = params
+
+            const input = new Input()
+
+            if ( input.oauth() )
+                client_id = input.oauth(`clientId`).toLowerCase()
+
+            if ( permitted_applications[0] === `` )
+                permitted_applications[0]  = `*`
+
+            if ( permitted_applications.includes(client_id) || permitted_applications[0] === `*` )
+                application_permission = true
+
+            if ( _controller.assign )
+            {
+                let assigned_applications = _controller.assign()
+
+                application_permission = !( assigned_applications !== undefined && assigned_applications.length && !assigned_applications.includes(client_id) )
+                permitted_applications = assigned_applications
+            }
+
+            const config =
+            {
+                _controller, folder, controller, class_name, method,
+                permission:application_permission,
+                applications:
+                {
+                    allowed: permitted_applications,
+                    accessed:client_id
+                },
+                params:params
+            }
+
+            return config
+
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }

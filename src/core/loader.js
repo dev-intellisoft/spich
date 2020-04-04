@@ -11,38 +11,47 @@ import fs from 'fs'
 
 class Loader
 {
-    model = model_name =>
+    model = async model_name =>
     {
         try
         {
-            this[`${model_name}_model`] = new register[`${model_name}_model`]()
+            let _model = await import(`${MOD_PATH}/${model_name}_model`)
+            if ( _model.default ) _model = _model.default
+            this[`${model_name}_model`] = new _model()
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
 
-    controller = controller_name =>
+    controller = async controller_name =>
     {
         try
         {
-            this[`${controller_name}`] = new register[`${controller_name}`]()
+            let _controller = await import(`${CTL_PATH}/${controller_name}`)
+            if ( _controller.default ) _controller = _controller.default
+            this[`${controller_name}`] = new _controller()
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
 
-    lib = library_name =>
+    lib = async library_name =>
     {
         try
         {
-            this[`${library_name}_lib`] = new register[`${library_name}_lib`]()
+            let _library = await import(`${LIB_PATH}/${library_name}_lib`)
+            if ( _library.default ) _library = _library.default
+            this[`${library_name}_lib`] = new _library()
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
@@ -55,6 +64,7 @@ class Loader
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
@@ -71,6 +81,7 @@ class Loader
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }

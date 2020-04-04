@@ -37,7 +37,6 @@ class Bootstrap
         {
             global.request = req
             global.response = res
-            global.register = await import(`${APP_PATH}/register`)
 
             const config = await new Router().router(req)
 
@@ -47,13 +46,14 @@ class Bootstrap
                 return res.json({code:100, message:`Server Error!`}).end()
             }
 
-            const { class_name, _class, method, permission, applications } = config
+            const { class_name, _controller, method, permission, applications } = config
 
             if ( permission )
             {
                 try
                 {
-                    const output = await _class[method]()
+                    await _controller._init()
+                    const output = await _controller[method]()
 
                     new logger().access(req, res)
                     
