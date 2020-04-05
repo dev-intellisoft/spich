@@ -25,6 +25,8 @@ class framework
         global.CTL_PATH = `${APP_PATH}/controllers`
         global.MOD_PATH = `${APP_PATH}/models`
         global.LIB_PATH = `${APP_PATH}/libs`
+        global.LOG_PATH  = `${APP_PATH}/logs`
+        global.VIEW_PATH = `${APP_PATH}/views`
 
         try
         {
@@ -147,6 +149,7 @@ class framework
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
