@@ -1,6 +1,6 @@
 {
   "name": "spich",
-  "version": "3.0.1",
+  "version": "3.0.3-dev",
   "description": "Spich FrameWork",
   "main": "index.js",
   "type": "module",
@@ -25,7 +25,7 @@
     "helmet": "^3.21.2",
     "mongoose": "^5.8.3",
     "mustache": "^4.0.0",
-    "oauth2-server": "2.4.1",
+    "oauth2-server": "^3.0.1",
     "pg": "^7.17.1",
     "pg-pool": "^2.0.9",
     "socket.io": "^2.3.0",
