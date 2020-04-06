@@ -154,7 +154,7 @@ class Router
             const input = new Input()
 
             if ( input.oauth() )
-                client_id = input.oauth(`clientId`).toLowerCase()
+                client_id = input.oauth(`app_name`).toLowerCase()
 
             if ( permitted_applications[0] === `` )
                 permitted_applications[0]  = `*`

@@ -4,27 +4,27 @@ import logger from '../logger'
 
 class MongoOAuth2Model
 {
-    getAccessToken = async (access_token, callback) =>
+    // getAccessToken = async (access_token, callback) =>
+    // {
+    //     console.log(`blah`)
+    // }
+    getAccessToken = async (access_token) =>
     {
         try
         {
-            const data = await new Database().select( `access_tokens`, { access_token } )
+            const token = await new Database().select( `access_tokens`, { access_token }, true )
+            const client = await new Database().select( `applications`, { _id:token.app_name }, true )
+            const user = await new Database().select( `users`, { _id:token.user_id } )
 
-            if (!data[0])
-            {
-                callback(data)
+            return {
+                accessToken: token.access_token,
+                accessTokenExpiresAt: token.expires,
+                user_id:token.user_id,
+                app_name:client.app_name,
+                scope: token.scope,
+                client: client, // with 'id' property
+                user: user
             }
-            else
-            {
-                callback(null,
-                    {
-                        accessToken: data[0].access_token,
-                        clientId: data[0].app_name,
-                        expires: data[0].expires,
-                        user_id: data[0].user_id,
-                        app_id: data[0].app_id
-                    })
-            }
         }
         catch ( e )
         {
@@ -32,100 +32,178 @@ class MongoOAuth2Model
         }
     }
 
-    getRefreshToken = async ( refresh_token, callback ) =>
+    // getRefreshToken = async ( refresh_token, callback ) =>
+    // {
+    //     try
+    //     {
+    //         const result = await new Database().select( `refresh_tokens`, { refresh_token } )
+    //         callback(null, result.length ?
+    //             {
+    //                 userId: result[0].user_id,
+    //                 clientId: result[0].app_name,
+    //                 expires: result[0].expires,
+    //                 refreshToken: result[0].refresh_token,
+    //             } : false)
+    //     }
+    //     catch ( e )
+    //     {
+    //         new logger().error(e)
+    //     }
+    // }
+
+    // saveRefreshToken = async ( refresh_token, app_name, expires, user_id, callback ) =>
+    // {
+    //     try
+    //     {
+    //         user_id = typeof user_id.id === `string`?user_id.id:user_id
+    //         const data = await new Database().insert( `refresh_tokens`, { refresh_token, app_name, user_id, expires } )
+    //         if( data ) callback(null, data)
+    //         else callback(true, false)
+    //     }
+    //     catch ( e )
+    //     {
+    //         new logger().error(e)
+    //     }
+    // }
+
+    // saveAccessToken = async (access_token, app_name, expires, user_id, callback) =>
+    // {
+    //     try
+    //     {
+    //         user_id = typeof user_id.id === `string`?user_id.id:user_id
+    //         const data = await new Database().insert( `access_tokens`, { access_token, app_name, user_id, expires } )
+    //         if( data ) callback(null, data)
+    //         else callback(true, false)
+    //     }
+    //     catch ( e )
+    //     {
+    //         new logger().error(e)
+    //     }
+    // }
+
+    saveToken = async (token, client, user) =>
     {
-        try
-        {
-            const result = await new Database().select( `refresh_tokens`, { refresh_token } )
-            callback(null, result.length ?
-                {
-                    userId: result[0].user_id,
-                    clientId: result[0].app_name,
-                    expires: result[0].expires,
-                    refreshToken: result[0].refresh_token,
-                } : false)
-        }
-        catch ( e )
-        {
-            new logger().error(e)
+        // console.log ( access_token, app_name, user)
+        const access_token = await new Database().insert( `access_tokens`, {
+            access_token: token.accessToken,
+            expires: token.accessTokenExpiresAt,
+            // scope: token.scope,
+            app_name: client.id,
+            user_id: user.id
+        })
+
+        const refesh_token = await new Database().insert( `refresh_tokens`, {
+            refresh_token: token.refreshToken,
+            expires: token.refreshTokenExpiresAt,
+            // scope: token.scope,
+            app_name: client.id,
+            user_id: user.id
+        } )
+
+        return {
+            access_token: access_token.access_token,
+            accessToken: access_token.access_token,
+            refresh_token: refesh_token.refresh_token,
+            access_token_expires_at: access_token.expires,
+            refresh_token_expires_at: refesh_token.expires,
+            scope: [`read`, `write`],
+            client: access_token.app_name,
+            user: access_token.user_id,
+            client_id: access_token.app_name,
+            user_id: access_token.user_id
         }
     }
 
-    saveRefreshToken = async ( refresh_token, app_name, expires, user_id, callback ) =>
-    {
-        try
-        {
-            user_id = typeof user_id.id === `string`?user_id.id:user_id
-            const data = await new Database().insert( `refresh_tokens`, { refresh_token, app_name, user_id, expires } )
-            if( data ) callback(null, data)
-            else callback(true, false)
-        }
-        catch ( e )
-        {
-            new logger().error(e)
-        }
-    }
 
-    saveAccessToken = async (access_token, app_name, expires, user_id, callback) =>
-    {
-        try
-        {
-            user_id = typeof user_id.id === `string`?user_id.id:user_id
-            const data = await new Database().insert( `access_tokens`, { access_token, app_name, user_id, expires } )
-            if( data ) callback(null, data)
-            else callback(true, false)
-        }
-        catch ( e )
-        {
-            new logger().error(e)
-        }
-    }
-
-    getUser = async  ( email, password, callback ) =>
+    getUser = async ( email, password ) =>
     {
         try
         {
             const user = await new Database().select( `users`, { email }, true )
-
             if( await bcrypt.compare(password, user.password) )
-                return callback(null, user._id)
-
-            return callback({ code:1, message:`some err had occured! ` })
+                return user
+            return { code:1, message:`Invalid username and/or password! ` }
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
 
-    getClient = async ( app_name, app_secret, callback ) =>
+    // getUser = async  ( email, password, callback ) =>
+    // {
+    //     try
+    //     {
+    //         const user = await new Database().select( `users`, { email }, true )
+    //
+    //         console.log ( `-----> getUser`, user )
+    //
+    //         if( await bcrypt.compare(password, user.password) )
+    //             return callback(null, user._id)
+    //
+    //         return callback({ code:1, message:`some err had occured! ` })
+    //     }
+    //     catch ( e )
+    //     {
+    //         console.log ( e )
+    //         new logger().error(e)
+    //     }
+    // }
+
+    async getClient( app_name, app_secret )
     {
         try
         {
-            const client = await new Database().select(`applications`, { app_name, app_secret })
-            if ( client.length )
-                callback(null, { clientId: client[0].app_name, clientSecret: client[0].app_secret })
-            else
-                return callback(result)
+            const client = await new Database().select(`applications`, { app_name, app_secret }, true)
+
+            return {
+                id: client.id,
+                redirectUris: client.redirect_url,
+                grants: client.grants
+            }
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
 
-    grantTypeAllowed = async  ( client_name, grant_type, callback ) =>
+    // grantTypeAllowed = async  ( client_name, grant_type, callback ) =>
+    // {
+    //     try
+    //     {
+    //         if ( grant_type === `password` || grant_type === `refresh_token` )
+    //             return callback(false, client_names.indexOf(client_name) >= 0)
+    //         callback(false, true)
+    //     }
+    //     catch ( e )
+    //     {
+    //         new logger().error(e)
+    //     }
+    // }
+
+
+    getRefreshToken = async( refresh_token ) =>
     {
-        try
-        {
-            if ( grant_type === `password` || grant_type === `refresh_token` )
-                return callback(false, client_names.indexOf(client_name) >= 0)
-            callback(false, true)
+        const refresh = await new Database().select( `refresh_tokens`, { refresh_token }, true )
+        const user = await new Database().select( `users`, { "_id":refresh.user_id }, true )
+        const client = await new Database().select( `applications`, { "_id":refresh.app_name }, true )
+
+        return {
+            refreshToken: refresh.refresh_token,
+            refreshTokenExpiresAt: refresh.expires_at,
+            scope: refresh.scope,
+            client: client, // with 'id' property
+            user: user
         }
-        catch ( e )
-        {
-            new logger().error(e)
-        }
+    }
+
+    revokeToken = async() =>
+    {
+        //this function should remove the token from database but to keep track action I won't do that
+        return true
     }
 
     load_applications = async () =>

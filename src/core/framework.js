@@ -11,12 +11,14 @@ import helmet from 'helmet'
 import bodyParser from 'body-parser'
 import https from 'spdy'
 import http from 'http'
-import oauthserver from 'oauth2-server'
+import OAuth2Server from 'oauth2-server'
 import PGOAuth2Model from './oauth/oauth-pg'
 import MongoOAuth2Model from './oauth/oauth-mongo'
 import structure from './oauth/structure'
 import socketio from 'socket.io'
 import logger from './logger'
+
+import uuid from "uuid/v4"
 
 class framework
 {
@@ -107,11 +109,9 @@ class framework
 
                     result.map(value => client_names.push(value.app_name))
 
-                    app.oauth = oauthserver(
+                    app.oauth = new OAuth2Server(
                     {
-                        model: MongoOAuth2Model,
-                        grants: [`auth_code`, `password`, `refresh_token`],
-                        debug: true
+                        model: MongoOAuth2Model
                     })
                 }
                 else if ( process.env.db_type === `postgres` )
@@ -120,27 +120,62 @@ class framework
 
                     result.map(value => client_names.push(value.app_name))
 
-                    app.oauth = oauthserver(
-                    {
-                        model: new PGOAuth2Model(),
-                        grants: [`auth_code`, `password`, `refresh_token`],
-                        debug: true
-                    })
+                    app.oauth = new OAuth2Server( { model: new PGOAuth2Model() })
                 }
 
-                app.all(`/oauth/token`, app.oauth.grant())
+                const { Request, Response } = OAuth2Server
+
+                app.all(`/oauth/token`,
+                    async (req, res) =>
+                    {
+                        try
+                        {
+                            new logger().access(req, res)
+                            res.send(
+                                await app.oauth.token(new Request(req), new Response(res))
+                            )
+                        }
+                        catch ( e )
+                        {
+                            console.log ( e )
+                            res.send(e)
+                        }
+                    }
+                )
 
                 app.all(`*`,  async (req, res, next) =>
                 {
-                    if (await new Bootstrap().is_public_route(req) || await new Bootstrap().is_static_route(req))
+                    if ( await new Bootstrap().is_public_route(req) || await new Bootstrap().is_static_route(req) )
+                    {
+                        new logger().access(req, res)
                         await new Bootstrap().run(req, res)
+                    }
                     else
+                    {
                         next()
+                    }
                 })
 
-                app.all(/^(?:(?!\/?.*uploads).*)/, app.oauth.authorise(), async (req, res) => await new Bootstrap().run(req, res))
+                app.all(/^(?:(?!\/?.*uploads).*)/,
+                    async (req, res) =>
+                    {
+                        try
+                        {
+                            req.oauth = await app.oauth.authenticate(new Request(req), new Response(res))
+                            new logger().access(req, res)
 
-                app.use(app.oauth.errorHandler())
+                            await new Bootstrap().run(req, res)
+                        }
+                        catch ( e )
+                        {
+                            console.log ( e )
+                            new logger().access(req, res)
+                            new logger().error(e)
+
+                            res.send(e)
+                        }
+                    }
+                )
             }
             else
             {

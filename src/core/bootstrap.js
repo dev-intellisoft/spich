@@ -15,6 +15,7 @@ class Bootstrap
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
@@ -27,6 +28,7 @@ class Bootstrap
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
@@ -54,8 +56,6 @@ class Bootstrap
                 {
                     await _controller._init()
                     const output = await _controller[method]()
-
-                    new logger().access(req, res)
                     
                     if (  Boolean(res.get(`html`)) )
                         res.set(`Content-type`, `text/html`)
@@ -66,19 +66,25 @@ class Bootstrap
 
                     res.send(output).end()
                 }
-                catch (ex)
+                catch ( e )
                 {
+                    console.log ( e )
+                    new logger().error(e)
                     //todo module does not exists return and log
                     res.json({code:100, message:`No function '${method}' found in controller '${class_name}'!`}).end()
                 }
             }
             else
             {
+                console.log ( e )
+                new logger().error(e)
                 res.json({code:100, message:`Application '${applications.accessed}' have no permission!`}).end()
             }
         }
         catch ( e )
         {
+
+            console.log ( e )
             new logger().error(e)
         }
     }
@@ -99,6 +105,7 @@ class Bootstrap
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }

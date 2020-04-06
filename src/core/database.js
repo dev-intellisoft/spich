@@ -22,6 +22,7 @@ class  Database
     {
         if ( process.env.db_type === `mongo` )
         {
+            mongoose.set(`useCreateIndex`, true)
             mongoose.connect(process.env.mongo_uri, {
                 useUnifiedTopology: true,
                 useNewUrlParser: true,

@@ -108,21 +108,23 @@ class Input
 
     oauth = key =>
     {
+
+        // console.log ( request.oauth )
         try
         {
             if(typeof key === 'object')
             {
-                for (const blah in key) request.oauth.bearerToken[`${blah}`] = key[blah]
+                for (const blah in key) request.oauth[`${blah}`] = key[blah]
             }
             else
             {
                 if(!key)
                 {
-                    return request.oauth !== undefined? request.oauth.bearerToken: undefined
+                    return request.oauth !== undefined? request.oauth: undefined
                 }
                 else
                 {
-                    return request.oauth !== undefined? request.oauth.bearerToken[`${key}`] : undefined
+                    return request.oauth !== undefined? request.oauth[`${key}`] : undefined
                 }
             }
         }
