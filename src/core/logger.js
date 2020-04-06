@@ -79,7 +79,6 @@ class logger
 
     error = ( error ) =>
     {
-        const request_id = request.request_id || ``
         let data = `[${new Date()}] ${error.stack || error }`
 
         if( debug > 0 || debug === `error` )
