@@ -1,6 +1,6 @@
 {
   "name": "spich",
-  "version": "3.0.3-dev",
+  "version": "3.0.4-dev",
   "description": "Spich FrameWork",
   "main": "index.js",
   "type": "module",
