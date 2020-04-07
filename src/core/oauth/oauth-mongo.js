@@ -4,10 +4,6 @@ import logger from '../logger'
 
 class MongoOAuth2Model
 {
-    // getAccessToken = async (access_token, callback) =>
-    // {
-    //     console.log(`blah`)
-    // }
     getAccessToken = async (access_token) =>
     {
         try
@@ -22,7 +18,7 @@ class MongoOAuth2Model
                 user_id:token.user_id,
                 app_name:client.app_name,
                 scope: token.scope,
-                client: client, // with 'id' property
+                client: client,
                 user: user
             }
         }
@@ -32,58 +28,8 @@ class MongoOAuth2Model
         }
     }
 
-    // getRefreshToken = async ( refresh_token, callback ) =>
-    // {
-    //     try
-    //     {
-    //         const result = await new Database().select( `refresh_tokens`, { refresh_token } )
-    //         callback(null, result.length ?
-    //             {
-    //                 userId: result[0].user_id,
-    //                 clientId: result[0].app_name,
-    //                 expires: result[0].expires,
-    //                 refreshToken: result[0].refresh_token,
-    //             } : false)
-    //     }
-    //     catch ( e )
-    //     {
-    //         new logger().error(e)
-    //     }
-    // }
-
-    // saveRefreshToken = async ( refresh_token, app_name, expires, user_id, callback ) =>
-    // {
-    //     try
-    //     {
-    //         user_id = typeof user_id.id === `string`?user_id.id:user_id
-    //         const data = await new Database().insert( `refresh_tokens`, { refresh_token, app_name, user_id, expires } )
-    //         if( data ) callback(null, data)
-    //         else callback(true, false)
-    //     }
-    //     catch ( e )
-    //     {
-    //         new logger().error(e)
-    //     }
-    // }
-
-    // saveAccessToken = async (access_token, app_name, expires, user_id, callback) =>
-    // {
-    //     try
-    //     {
-    //         user_id = typeof user_id.id === `string`?user_id.id:user_id
-    //         const data = await new Database().insert( `access_tokens`, { access_token, app_name, user_id, expires } )
-    //         if( data ) callback(null, data)
-    //         else callback(true, false)
-    //     }
-    //     catch ( e )
-    //     {
-    //         new logger().error(e)
-    //     }
-    // }
-
     saveToken = async (token, client, user) =>
     {
-        // console.log ( access_token, app_name, user)
         const access_token = await new Database().insert( `access_tokens`, {
             access_token: token.accessToken,
             expires: token.accessTokenExpiresAt,
@@ -131,26 +77,6 @@ class MongoOAuth2Model
         }
     }
 
-    // getUser = async  ( email, password, callback ) =>
-    // {
-    //     try
-    //     {
-    //         const user = await new Database().select( `users`, { email }, true )
-    //
-    //         console.log ( `-----> getUser`, user )
-    //
-    //         if( await bcrypt.compare(password, user.password) )
-    //             return callback(null, user._id)
-    //
-    //         return callback({ code:1, message:`some err had occured! ` })
-    //     }
-    //     catch ( e )
-    //     {
-    //         console.log ( e )
-    //         new logger().error(e)
-    //     }
-    // }
-
     async getClient( app_name, app_secret )
     {
         try
@@ -169,21 +95,6 @@ class MongoOAuth2Model
             new logger().error(e)
         }
     }
-
-    // grantTypeAllowed = async  ( client_name, grant_type, callback ) =>
-    // {
-    //     try
-    //     {
-    //         if ( grant_type === `password` || grant_type === `refresh_token` )
-    //             return callback(false, client_names.indexOf(client_name) >= 0)
-    //         callback(false, true)
-    //     }
-    //     catch ( e )
-    //     {
-    //         new logger().error(e)
-    //     }
-    // }
-
 
     getRefreshToken = async( refresh_token ) =>
     {

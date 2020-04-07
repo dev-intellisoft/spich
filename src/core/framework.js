@@ -137,8 +137,7 @@ class framework
                         }
                         catch ( e )
                         {
-                            console.log ( e )
-                            res.send(e)
+                            res.status(e.status).send(e)
                         }
                     }
                 )
@@ -168,11 +167,9 @@ class framework
                         }
                         catch ( e )
                         {
-                            console.log ( e )
                             new logger().access(req, res)
                             new logger().error(e)
-
-                            res.send(e)
+                            res.status(e.status).send(e)
                         }
                     }
                 )
@@ -184,7 +181,6 @@ class framework
         }
         catch ( e )
         {
-            console.log ( e )
             new logger().error(e)
         }
     }
