@@ -17,10 +17,11 @@ import MongoOAuth2Model from './oauth/oauth-mongo'
 import structure from './oauth/structure'
 import socketio from 'socket.io'
 import logger from './logger'
+import fileUpload from 'express-fileupload'
 
-import uuid from "uuid/v4"
+// import uuid from "uuid/v4"
 
-class framework
+class spich
 {
     async run()
     {
@@ -39,6 +40,7 @@ class framework
             app.use(cors())
             app.use(bodyParser.json())
             app.use(bodyParser.urlencoded({extended: false}))
+            app.use(fileUpload())
 
             global.connections = 0
 
@@ -186,4 +188,4 @@ class framework
     }
 }
 
-export default framework
+export default spich
