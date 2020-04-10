@@ -41,6 +41,7 @@ class spich
             app.use(bodyParser.json())
             app.use(bodyParser.urlencoded({extended: false}))
             app.use(fileUpload())
+            app.use('/uploads', express.static(`${APP_PATH}/storage`));
 
             global.connections = 0
 
