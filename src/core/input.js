@@ -6,6 +6,27 @@ import logger from './logger'
 
 class Input
 {
+    file = key =>
+    {
+        try
+        {
+            if(typeof key === 'object')
+            {
+                for (const blah in key) request.files[`${blah}`] = key[blah]
+            }
+            else
+            {
+                if(!key)  return request.files
+                else return request.files[`${key}`]
+            }
+        }
+        catch ( e )
+        {
+            console.log ( e )
+            new logger().error(e)
+        }
+    }
+
     post = key =>
     {
         try
