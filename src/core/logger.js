@@ -5,7 +5,7 @@
 
 import accesslog from 'access-log'
 import fs from 'fs'
-
+import moment from 'moment'
 const debug = process.env.debug || 0
 
 class logger
@@ -29,32 +29,10 @@ class logger
                 console.log(``)
             }
 
-            fs.open(`${LOG_PATH}/access.log`, `a`, 666, ( e, id ) =>
+            fs.open(`${LOG_PATH}/access_${moment().format('YYYY-MM-DD')}.log`, `a`, 666, ( e, id ) =>
                 fs.write( id, `${data}\n`, null, `utf8`, () =>
                     fs.close(id, () => {})))
         })
-    }
-
-    log_zoho_request = ( config ) =>
-    {
-        const method = config.method || `GET`
-        let url = config.url
-        let form = config.form || ``
-        let opp_access_token = config.opp_access_token || ``
-
-        let data = `[${new Date()}] METHOD="${method}"; URL="${url}"; DATA="${form}"; ACCESS_TOKEN="${opp_access_token}";`
-
-        if( debug > 0 || debug === `zoho` )
-        {
-            console.log(``)
-            console.log(`################ Request Log ################`)
-            console.log(data)
-            console.log(``)
-        }
-
-        fs.open(`${LOG_PATH}/zoho.log`, `a`, 666, ( e, id ) =>
-            fs.write( id, `${data}\n`, null, `utf8`, () =>
-                fs.close(id, () => {})))
     }
 
     log_query = ( sql ) =>
@@ -72,7 +50,7 @@ class logger
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
 
-        fs.open(`${LOG_PATH}/query.log`, 'a', 666, ( e, id ) =>
+        fs.open(`${LOG_PATH}/query_${moment().format('YYYY-MM-DD')}.log`, 'a', 666, ( e, id ) =>
             fs.write( id, `${data}\n`, null, 'utf8', () =>
                 fs.close(id, () => {}) ))
     }
@@ -92,7 +70,7 @@ class logger
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
 
-        fs.open(`${LOG_PATH}/error.log`, 'a', 666, ( e, id ) =>
+        fs.open(`${LOG_PATH}/error_${moment().format('YYYY-MM-DD')}.log`, 'a', 666, ( e, id ) =>
             fs.write( id, `${data}\n`, null, 'utf8', () =>
                 fs.close(id, () => {})))
     }
