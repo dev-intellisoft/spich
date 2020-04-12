@@ -14,7 +14,7 @@ class logger
     {
         const access_token = req.oauth?req.oauth.accessToken: ``
         const user_id = req.oauth?req.oauth.user_id: ``
-        const log_format = `USERID="${user_id}"; IP=":ip"; XIP=":Xip"; HOST=":host"; METHOD=":method"; PROTO=":protocol"; URL=":url"; USERAGENT=":userAgent"; PERIOD[FROM=":startDate :startTime" TO=":endDate :endTime"]; CLF=":clfDate"; DELTA=":delta"; HTTP_VERSION=":httpVersion"; REFERER=":referer"; URL_DECODED=":urlDecoded"; LENGTH=":contentLength"; ACCESS_TOKEN="${access_token}" DATA="${JSON.stringify(req.body)}"`
+        const log_format = `USERID="${user_id}"; IP=":ip"; XIP=":Xip"; HOST=":host"; METHOD=":method"; PROTO=":protocol"; URL=":url"; USERAGENT=":userAgent"; PERIOD[FROM=":startDate :startTime" TO=":endDate :endTime"]; CLF=":clfDate"; DELTA=":delta"; HTTP_VERSION=":httpVersion"; REFERER=":referer"; URL_DECODED=":urlDecoded"; LENGTH=":contentLength"; ACCESS_TOKEN="${access_token}"; DATA="${JSON.stringify(req.body)}; SPICH_VERSION=${SPICH_VERSION}; PROJECT_VESION=${PROJECT_VERSION}"`
 
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
@@ -59,7 +59,7 @@ class logger
 
     log_query = ( sql ) =>
     {
-        let data = `[${new Date()}] ${sql}`
+        const data = `[${new Date()}; SPICH_VERSION=${SPICH_VERSION}; PROJECT_VESION=${PROJECT_VERSION}] ${sql}`
 
         if( debug > 0 || debug === `sql` )
         {
@@ -79,7 +79,7 @@ class logger
 
     error = ( error ) =>
     {
-        let data = `[${new Date()}] ${error.stack || error }`
+        const data = `[${new Date()}] ${error.stack || error }`
 
         if( debug > 0 || debug === `error` )
         {

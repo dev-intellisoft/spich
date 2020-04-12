@@ -18,6 +18,7 @@ import structure from './oauth/structure'
 import socketio from 'socket.io'
 import logger from './logger'
 import fileUpload from 'express-fileupload'
+import pack from '../../package.json'
 
 // import uuid from "uuid/v4"
 
@@ -28,8 +29,10 @@ class spich
         global.CTL_PATH = `${APP_PATH}/controllers`
         global.MOD_PATH = `${APP_PATH}/models`
         global.LIB_PATH = `${APP_PATH}/libs`
-        global.LOG_PATH  = `${APP_PATH}/logs`
         global.VIEW_PATH = `${APP_PATH}/views`
+        global.STORAGE_PATH = `${APP_PATH}/storage`
+        global.LOG_PATH  = `${STORAGE_PATH}/logs`
+        global.UPLOADS_PATH  = `${STORAGE_PATH}/uploads`
 
         try
         {
@@ -41,7 +44,17 @@ class spich
             app.use(bodyParser.json())
             app.use(bodyParser.urlencoded({extended: false}))
             app.use(fileUpload())
-            app.use('/uploads', express.static(`${APP_PATH}/storage`));
+            app.use('/uploads', express.static(UPLOADS_PATH))
+
+            let project = await import(`${APP_PATH}/package.json`)
+            if ( project.default )
+                project = project.default
+
+            if ( project.version )
+                global.PROJECT_VERSION = project.version
+
+            if ( pack.version )
+                global.SPICH_VERSION = pack.version
 
             global.connections = 0
 
@@ -60,9 +73,10 @@ class spich
 
                 https_server.listen(port)
                 console.log(`######################################################################`)
-                console.log(`#                      Welcome  to ${process.env.server_api_name}                           #`)
-                console.log(`#      Description ${process.env.server_name}                            #`)
-                console.log(`#      The server is running on port ${port} in SSL Mode                 #`)
+                console.log(`#                      Welcome  to ${project.name}                           #`)
+                console.log(`#      Description ${project.description}                            #`)
+                console.log(`#      This server is running on port ${port} in SSL Mode                 #`)
+                console.log(`#      Powered by ${pack.name} (${pack.version})                     #`)
                 console.log(`######################################################################`)
             }
             else
@@ -73,9 +87,10 @@ class spich
                 http_server.listen(port)
 
                 console.log(`######################################################################`)
-                console.log(`#                      Welcome  to ${process.env.server_api_name}                           #`)
-                console.log(`#      Description ${process.env.server_name}                            #`)
-                console.log(`#      The server is running on port ${port} in NO SSL Mode               #`)
+                console.log(`#                      Welcome  to ${project.name}                           #`)
+                console.log(`#      Description ${project.description}                            #`)
+                console.log(`#      This server is running on port ${port} in NO SSL Mode               #`)
+                console.log(`#      Powered by ${pack.name} (${pack.version})                      #`)
                 console.log(`######################################################################`)
             }
 
