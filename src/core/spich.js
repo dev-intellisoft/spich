@@ -144,7 +144,7 @@ class spich
                 const { Request, Response } = OAuth2Server
 
 
-                app.get(`/socket.io`, (req, res) => res.send(``))
+                app.all(`/socket.io`, (req, res) => res.send(``))
 
                 app.all(`/oauth/token`,
                     async (req, res) =>
