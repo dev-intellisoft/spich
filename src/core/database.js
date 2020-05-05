@@ -67,10 +67,27 @@ class  Database
 
             if (one)
                 return await model.findOne(where)
-            else
-                return await model.find(where)
+            return await model.find(where)
         }
         catch (e)
+        {
+            new logger().error(e)
+            return e
+        }
+    }
+
+    select_partial = async ( collection, where, part, one ) =>
+    {
+        try
+        {
+            const model = await this.load(collection)
+
+            if ( one )
+                return await model.findOne(where, part)
+
+            return await model.find(where, part)
+        }
+        catch ( e )
         {
             new logger().error(e)
             return e

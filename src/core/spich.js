@@ -69,9 +69,9 @@ class spich
                     passphrase: process.env.ssl_pass
                 }
 
-                var https_server = https.createServer(credentials, app) //added
+                var server = https.createServer(credentials, app) //added
 
-                https_server.listen(port)
+                server.listen(port)
                 console.log(`######################################################################`)
                 console.log(`#                      Welcome  to ${project.name}                           #`)
                 console.log(`#      Description ${project.description}                            #`)
@@ -83,8 +83,8 @@ class spich
             {
                 const port = process.env.server_port || 80
 
-                var http_server = http.createServer(app)
-                http_server.listen(port)
+                var server = http.createServer(app)
+                server.listen(port)
 
                 console.log(`######################################################################`)
                 console.log(`#                      Welcome  to ${project.name}                           #`)
@@ -95,7 +95,7 @@ class spich
             }
 
 
-            global.io = socketio(http_server)
+            global.io = socketio(server)
 
             io.on('connection', (socket) =>
             {
