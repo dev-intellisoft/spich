@@ -124,11 +124,15 @@ class  Database
         }
     }
 
-    delete = async ( collection, where ) =>
+    delete = async ( collection, where, many = false ) =>
     {
         try
         {
             const model = await this.load(collection)
+
+            if ( many )
+                return await model.deleteMany(where)
+
             return await model.findOneAndRemove(where)
         }
         catch (e)
