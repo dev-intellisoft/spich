@@ -109,11 +109,13 @@ class  Database
         }
     }
 
-    update = async ( collection, data, where ) =>
+    update = async ( collection, data, where, many = false ) =>
     {
         try
         {
             const model = await this.load(collection)
+            if( many )
+                return await model.updateMany(where, data)
             await model.findOneAndUpdate(where, data)
             return await model.find(where)
         }
