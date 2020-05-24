@@ -20,6 +20,8 @@ import logger from './logger'
 import fileUpload from 'express-fileupload'
 import pack from '../../package.json'
 
+import mongoose from 'mongoose'
+
 // import uuid from "uuid/v4"
 
 class spich
@@ -36,6 +38,17 @@ class spich
 
         try
         {
+
+            if ( process.env.db_type === `mongo` )
+            {
+                mongoose.set(`useCreateIndex`, true)
+                mongoose.connect(process.env.mongo_uri, {
+                    useUnifiedTopology: true,
+                    useNewUrlParser: true,
+                    useFindAndModify:false
+                })
+            }
+
             const app = express()
             app.use(helmet())
             app.disable(`x-powered-by`)

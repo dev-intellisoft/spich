@@ -20,15 +20,15 @@ class  Database
 {
     constructor()
     {
-        if ( process.env.db_type === `mongo` )
-        {
-            mongoose.set(`useCreateIndex`, true)
-            mongoose.connect(process.env.mongo_uri, {
-                useUnifiedTopology: true,
-                useNewUrlParser: true,
-                useFindAndModify:false
-            })
-        }
+        // if ( process.env.db_type === `mongo` )
+        // {
+        //     mongoose.set(`useCreateIndex`, true)
+        //     mongoose.connect(process.env.mongo_uri, {
+        //         useUnifiedTopology: true,
+        //         useNewUrlParser: true,
+        //         useFindAndModify:false
+        //     })
+        // }
     }
 
     load = async ( collection ) =>
