@@ -55,6 +55,7 @@ class spich
             app.set(`trust_proxy`, true);
             app.use(cors())
             app.use(bodyParser.json())
+            app.use(bodyParser.text())
             app.use(bodyParser.urlencoded({extended: false}))
             app.use(fileUpload())
             app.use('/uploads', express.static(UPLOADS_PATH))
