@@ -129,8 +129,6 @@ class Input
 
     oauth = key =>
     {
-
-        // console.log ( request.oauth )
         try
         {
             if(typeof key === 'object')
@@ -140,13 +138,31 @@ class Input
             else
             {
                 if(!key)
-                {
                     return request.oauth !== undefined? request.oauth: undefined
-                }
                 else
-                {
                     return request.oauth !== undefined? request.oauth[`${key}`] : undefined
-                }
+            }
+        }
+        catch ( e )
+        {
+            new logger().error(e)
+        }
+    }
+
+    headers = key =>
+    {
+        try
+        {
+            if(typeof key === 'object')
+            {
+                for (const blah in key) request.headers[`${blah}`] = key[blah]
+            }
+            else
+            {
+                if(!key)
+                    return request.headers !== undefined? request.headers: undefined
+                else
+                    return request.headers !== undefined? request.headers[`${key}`] : undefined
             }
         }
         catch ( e )
