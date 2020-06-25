@@ -183,7 +183,7 @@ class Input
         }
     }
 
-    my_ip = () =>
+    remote_ip = () =>
     {
         return request.connection.remoteAddress
     }
