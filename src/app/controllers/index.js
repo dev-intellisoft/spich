@@ -1,21 +1,21 @@
 import { controller } from 'spich'
 
-class index extends controller
+class {{controller}} extends controller
 {
-    constructor ()
+    constructor (props)
     {
-        super()
+        super(props)
     }
 
     async _init()
     {
-
+        {{loaders}}
     }
 
     async index()
     {
-        return this.view(`index`)
+        return this.view(`{{view}}`)
     }
 }
 
-export default index
+export default {{controller}}
