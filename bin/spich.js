@@ -10,9 +10,9 @@ switch ( command )
 {
     case `init`:
     {
-        const index = ``
-        const view = ``
-        const controller = ``
+        const index = fs.readFileSync(`./node_modules/spich/src/app/index.js`).toString()
+        const view = fs.readFileSync(`./node_modules/spich/src/app/views/index.html`).toString()
+        const controller = fs.readFileSync(`./node_modules/spich/src/app/controllers/index.js`).toString()
 
         if ( !fs.existsSync(`controllers`) )
             fs.mkdirSync(`controllers`)

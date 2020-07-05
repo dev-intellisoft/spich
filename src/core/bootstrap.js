@@ -56,8 +56,10 @@ class Bootstrap
                 {
                     await _controller._init()
                     const output = await _controller[method]()
-                    
-                    if (  Boolean(res.get(`html`)) )
+
+                    if ( output.toString().startsWith(`<`) === true )
+                        res.set(`Content-type`, `text/html`)
+                    else if ( Boolean(res.get(`html`)) )
                         res.set(`Content-type`, `text/html`)
                     else if( Buffer.isBuffer(output) )
                         res.set(`Content-type`, `application/pdf`)
