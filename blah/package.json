@@ -1,0 +1,21 @@
+{
+  "name": "spich-framework",
+  "version": "1.0.0",
+  "description": "this is just a presentation to spich framework",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon  -w index.js -w register.js -w controllers -w models -w libs --exec \"node --es-module-specifier-resolution=node --unhandled-rejections=none index.js\"",
+    "prod": "node --es-module-specifier-resolution=node --unhandled-rejections=none index.js"
+  },
+  "keywords": [
+    "spich",
+    "example"
+  ],
+  "author": "Wellington Cunha",
+  "license": "MIT",
+  "dependencies": {
+    "spich": "^3.3.4"
+  }
+}
