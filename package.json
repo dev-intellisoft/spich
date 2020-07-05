@@ -7,6 +7,9 @@
   "directories": {
     "test": "test"
   },
+  "bin": {
+    "spich": "bin/spich.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "supervisor -w src, .env, server.js register.js server.js"
