@@ -12,20 +12,20 @@ class PGOAuth2Model
         try
         {
             const sql = `
-            SELECT 
-                app_name, app_secret, redirect_uri 
-            FROM 
-                ${process.env.db_schema || `public`}.applications 
-            WHERE 
-                app_name = '${client_id}' 
-            AND 
-                app_secret = MD5('${client_secret}')
-        `
+                SELECT 
+                    app_id, app_name, app_secret, redirect_uri
+                FROM 
+                    ${process.env.db_schema || `public`}.applications 
+                WHERE 
+                    app_name = '${client_id}' 
+                AND 
+                    app_secret = MD5('${client_secret}')
+            `
             const result = await new Database().query(sql)
             if (!result[0])
                 return callback(result)
             else
-                callback(null, { clientId: result[0].app_name,  clientSecret: result[0].app_secret })
+                callback(null, { app_id:result[0].app_id,  app_name: result[0].app_name,  clientSecret: result[0].app_secret, grants:[`password`, `authorization_code`, `client_credentials`, `refresh_token`] })
         }
         catch ( e )
         {
@@ -52,14 +52,14 @@ class PGOAuth2Model
         try
         {
             const sql = `
-            SELECT 
-                user_id 
-            FROM 
-                ${process.env.db_schema || `public`}.users 
-            WHERE 
-                email = '${username}' 
-            AND 
-                password = MD5('${password}')`
+                SELECT 
+                    user_id 
+                FROM 
+                    ${process.env.db_schema || `public`}.users 
+                WHERE 
+                    email = '${username}' 
+                AND 
+                    password = MD5('${password}')`
             const result = await new Database().query(sql)
 
             if (!result[0])
@@ -82,15 +82,15 @@ class PGOAuth2Model
             expires = expires.toString().replace(/GMT.*$/,  timezone)
 
             const sql = `
-            INSERT INTO 
-                ${process.env.db_schema || `public`}.refresh_tokens(app_id, user_id, app, refresh_token, expires)
-            SELECT 
-                app_id, '${user_id}', app_name, '${refresh_token}', '${expires}'  
-            FROM 
-                ${process.env.db_schema || `public`}.applications 
-            WHERE 
-                app_name = '${client_id}'
-        `
+                INSERT INTO 
+                    ${process.env.db_schema || `public`}.refresh_tokens(app_id, user_id, app, refresh_token, expires)
+                SELECT 
+                    app_id, '${user_id}', app_name, '${refresh_token}', '${expires}'  
+                FROM 
+                    ${process.env.db_schema || `public`}.applications 
+                WHERE 
+                    app_name = '${client_id}'
+            `
             const result = await new Database().query(sql)
             if(!result.error)
                 callback(null, result)
@@ -111,17 +111,17 @@ class PGOAuth2Model
             if(user_id.id) user_id = user_id.id
             expires = expires.toString().replace(/GMT.*$/, timezone)
             const sql = `
-            INSERT INTO 
-                ${process.env.db_schema || `public`}.access_tokens(
-                    app_id, user_id, access_token, app,  expires
-                )
-            SELECT 
-                app_id, '${user_id}', '${access_token}', app_name, '${expires}'
-            FROM 
-                ${process.env.db_schema || `public`}.applications 
-            WHERE 
-                app_name = '${client_id}'
-        `
+                INSERT INTO 
+                    ${process.env.db_schema || `public`}.access_tokens(
+                        app_id, user_id, access_token, app,  expires
+                    )
+                SELECT 
+                    app_id, '${user_id}', '${access_token}', app_name, '${expires}'
+                FROM 
+                    ${process.env.db_schema || `public`}.applications 
+                WHERE 
+                    app_name = '${client_id}'
+            `
             const result = await new Database().query(sql)
             if(!result.error) callback(null, result)
             else callback(result, false)
@@ -132,38 +132,41 @@ class PGOAuth2Model
         }
     }
 
-    getAccessToken = async ( bearer_token, callback ) =>
+    getAccessToken = async ( bearer_token ) =>
     {
         try
         {
             const sql = `
-            SELECT 
-                at.access_token, at.app, at.expires, at.user_id, at.app_id
-            FROM 
-                ${process.env.db_schema || `public`}.access_tokens at
-            LEFT JOIN 
-                ${process.env.db_schema || `public`}.users u 
-            ON 
-                u.user_id = at.user_id
-            WHERE 
-                access_token = '${bearer_token}'
-        `
+                SELECT 
+                    at.access_token, at.app, at.expires, at.user_id, at.app_id
+                FROM 
+                    ${process.env.db_schema || `public`}.access_tokens at
+                LEFT JOIN 
+                    ${process.env.db_schema || `public`}.users u 
+                ON 
+                    u.user_id = at.user_id
+                WHERE 
+                    access_token = '${bearer_token}'
+            `
             const result = await new Database().query(sql)
 
             if (!result[0])
             {
-                callback(result)
+                return `erro`
             }
             else
             {
-                callback(null,
-                    {
-                        accessToken: result[0].access_token,
-                        clientId: result[0].app,
-                        expires: result[0].expires,
-                        user_id: result[0].user_id,
-                        app_id: result[0].app_id
-                    })
+                return {
+                    accessToken: result[0].access_token,
+                    clientId: result[0].app_id,
+                    expires: result[0].expires,
+                    accessTokenExpiresAt:result[0].expires,
+                    user_id: result[0].user_id,
+                    app_id: result[0].app_id,
+                    user: {
+                        user_id:result[0].user_id
+                    }
+                }
             }
         }
         catch ( e )
@@ -177,18 +180,18 @@ class PGOAuth2Model
         try
         {
             const sql = `
-            SELECT 
-                refresh_token, app, expires, user_id 
-            FROM 
-                ${process.env.db_schema || `public`}.refresh_tokens 
-            WHERE 
-                refresh_token = '${bearer_token}'
-        `
+                SELECT 
+                    refresh_token, app, expires, user_id 
+                FROM 
+                    ${process.env.db_schema || `public`}.refresh_tokens 
+                WHERE 
+                    refresh_token = '${bearer_token}'
+            `
             const result = await new Database().query(sql)
             callback(null, result.length ?
                 {
                     userId: result[0].user_id,
-                    clientId: result[0].app,
+                    clientId: result[0].app_id,
                     expires: result[0].expires,
                     refreshToken: result[0].refresh_token,
                 } : false)
@@ -196,6 +199,49 @@ class PGOAuth2Model
         catch ( e )
         {
             new logger().error(e)
+        }
+    }
+
+    saveToken = async (token, { app_id, app_name }, user_id ) =>
+    {
+        try
+        {
+            const at_expires = new Date(token.accessTokenExpiresAt).toUTCString()
+
+            const [ access_token ] = await new Database().query(`
+                INSERT INTO 
+                    ${process.env.db_schema || `public`}.access_tokens
+                    ( access_token, expires, app_id, app, user_id )
+                VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
+                RETURNING access_token, expires, app_id, app, user_id
+            `)
+
+            const rt_expires = new Date(token.refreshTokenExpiresAt).toUTCString()
+
+            const [ refresh_token ] = await new Database().query(`
+                INSERT INTO
+                    ${process.env.db_schema || `public`}.refresh_tokens
+                    ( refresh_token, expires, app_id, app , user_id )
+                VALUES( '${token.refreshToken}', '${rt_expires}', ${app_id}, '${app_name}', ${user_id} )
+                RETURNING refresh_token, expires, app_id, app , user_id
+            `)
+
+            return {
+                access_token: access_token.access_token,
+                accessToken: access_token.access_token,
+                refresh_token: refresh_token.refresh_token,
+                access_token_expires_at: access_token.expires,
+                refresh_token_expires_at: refresh_token.expires,
+                scope: [`read`, `write`],
+                client: access_token.app,
+                user: access_token.user_id,
+                client_id: access_token.app_id,
+                user_id: access_token.user_id
+            }
+        }
+        catch ( e )
+        {
+            return `erro`
         }
     }
 }
