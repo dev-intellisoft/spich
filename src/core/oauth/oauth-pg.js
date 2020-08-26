@@ -4,6 +4,7 @@
 
 import Database from '../database'
 import logger from '../logger'
+import fs from 'fs'
 
 class PGOAuth2Model
 {
@@ -83,7 +84,7 @@ class PGOAuth2Model
 
             const sql = `
                 INSERT INTO 
-                    ${process.env.db_schema || `public`}.refresh_tokens(app_id, user_id, app, refresh_token, expires)
+                    ${process.env.db_schema || `public`}.refresh_tokens(app_id, user_id, app_name, refresh_token, expires)
                 SELECT 
                     app_id, '${user_id}', app_name, '${refresh_token}', '${expires}'  
                 FROM 
@@ -113,7 +114,7 @@ class PGOAuth2Model
             const sql = `
                 INSERT INTO 
                     ${process.env.db_schema || `public`}.access_tokens(
-                        app_id, user_id, access_token, app,  expires
+                        app_id, user_id, access_token, app_name,  expires
                     )
                 SELECT 
                     app_id, '${user_id}', '${access_token}', app_name, '${expires}'
@@ -136,9 +137,17 @@ class PGOAuth2Model
     {
         try
         {
+            // if ( fs. )
+            // const pg_model = await import(`${APP_PATH}/cor/model/oauth-pg`)
+            //
+            // const model = new pg_model.default
+            //
+            // if ( typeof model.getAccessToken === `function`)
+            //     console.log(`function 'getAccessToken' exists`)
+            // console.log ( `++++++++++++++>`, new pg_model.default )
             const sql = `
                 SELECT 
-                    at.access_token, at.app, at.expires, at.user_id, at.app_id
+                    at.access_token, at.app_name, at.expires, at.user_id, at.app_id
                 FROM 
                     ${process.env.db_schema || `public`}.access_tokens at
                 LEFT JOIN 
@@ -163,6 +172,7 @@ class PGOAuth2Model
                     accessTokenExpiresAt:result[0].expires,
                     user_id: result[0].user_id,
                     app_id: result[0].app_id,
+                    app_name: result[0].app_name,
                     user: {
                         user_id:result[0].user_id
                     }
@@ -171,6 +181,8 @@ class PGOAuth2Model
         }
         catch ( e )
         {
+            console.log ( e )
+            return e
             new logger().error(e)
         }
     }
@@ -181,7 +193,7 @@ class PGOAuth2Model
         {
             const sql = `
                 SELECT 
-                    refresh_token, app, expires, user_id 
+                    refresh_token, app_name, expires, user_id 
                 FROM 
                     ${process.env.db_schema || `public`}.refresh_tokens 
                 WHERE 
@@ -211,9 +223,9 @@ class PGOAuth2Model
             const [ access_token ] = await new Database().query(`
                 INSERT INTO 
                     ${process.env.db_schema || `public`}.access_tokens
-                    ( access_token, expires, app_id, app, user_id )
+                    ( access_token, expires, app_id, app_name, user_id )
                 VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING access_token, expires, app_id, app, user_id
+                RETURNING access_token, expires, app_id, app_name, user_id
             `)
 
             const rt_expires = new Date(token.refreshTokenExpiresAt).toUTCString()
@@ -221,9 +233,9 @@ class PGOAuth2Model
             const [ refresh_token ] = await new Database().query(`
                 INSERT INTO
                     ${process.env.db_schema || `public`}.refresh_tokens
-                    ( refresh_token, expires, app_id, app , user_id )
+                    ( refresh_token, expires, app_id, app_name , user_id )
                 VALUES( '${token.refreshToken}', '${rt_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING refresh_token, expires, app_id, app , user_id
+                RETURNING refresh_token, expires, app_id, app_name , user_id
             `)
 
             return {
@@ -233,7 +245,8 @@ class PGOAuth2Model
                 access_token_expires_at: access_token.expires,
                 refresh_token_expires_at: refresh_token.expires,
                 scope: [`read`, `write`],
-                client: access_token.app,
+                client: access_token.app_name,
+                app_name: access_token.app_name,
                 user: access_token.user_id,
                 client_id: access_token.app_id,
                 user_id: access_token.user_id
