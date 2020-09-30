@@ -137,14 +137,17 @@ class PGOAuth2Model
     {
         try
         {
-            // if ( fs. )
-            // const pg_model = await import(`${APP_PATH}/cor/model/oauth-pg`)
-            //
-            // const model = new pg_model.default
-            //
-            // if ( typeof model.getAccessToken === `function`)
-            //     console.log(`function 'getAccessToken' exists`)
-            // console.log ( `++++++++++++++>`, new pg_model.default )
+
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            {
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+
+                const model = new pg_model.default
+
+                if ( typeof model.getAccessToken === `function`)
+                    return await model.getAccessToken ( bearer_token )
+            }
+
             const sql = `
                 SELECT 
                     at.access_token, at.app_name, at.expires, at.user_id, at.app_id
@@ -181,9 +184,8 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            console.log ( e )
-            return e
             new logger().error(e)
+            return e
         }
     }
 

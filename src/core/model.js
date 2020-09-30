@@ -10,6 +10,13 @@ class Model extends Database
     constructor(props)
     {
         super(props)
+        if ( process.env.db_type === `postgres` )
+        {
+            delete this.select
+            delete this.insert
+            delete this.update
+            delete this.delete
+        }
     }
 }
 
