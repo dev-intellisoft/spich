@@ -189,10 +189,21 @@ class PGOAuth2Model
         }
     }
 
-    getRefreshToken = async ( bearer_token, callback ) =>
+    getRefreshToken = async ( bearer_token ) =>
     {
+        console.log ( 7 )
         try
         {
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            {
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+
+                const model = new pg_model.default
+
+                if ( typeof model.getRefreshToken === `function`)
+                    return await model.getRefreshToken ( bearer_token )
+            }
+            
             const sql = `
                 SELECT 
                     refresh_token, app_name, expires, user_id 
@@ -201,27 +212,70 @@ class PGOAuth2Model
                 WHERE 
                     refresh_token = '${bearer_token}'
             `
-            const result = await new Database().query(sql)
-            callback(null, result.length ?
-                {
-                    userId: result[0].user_id,
-                    clientId: result[0].app_id,
-                    expires: result[0].expires,
-                    refreshToken: result[0].refresh_token,
-                } : false)
+
+            const [ result ] = await new Database().query(sql)
+
+            const sql2 = `
+                SELECT 
+                    app_id, app_name
+                FROM 
+                    ${process.env.db_schema || `public`}.applications
+                WHERE 
+                    app_name = '${result.app_name}'
+            `
+
+            const [ client ] = await new Database().query(sql2)
+
+
+            const sql3 = `
+                SELECT 
+                    *
+                FROM
+                    ${process.env.db_schema || `public`}.users
+                WHERE   
+                    user_id = ${result.user_id}
+            `
+
+            const [ user ] = await new Database().query(sql3)
+
+
+            return {
+                refreshToken: result.refresh_token,
+                refreshTokenExpiresAt: result.expires,
+                scope: [`read`, `write`],
+                client: client.app_name, // with 'id' property
+                user: user.user_id
+            };
         }
         catch ( e )
         {
+            console.log ( e )
             new logger().error(e)
         }
     }
 
+
+    revokeToken = async() =>
+    {
+        console.log ( 8 )
+        //this function should remove the token from database but to keep track action I won't do that
+        return true
+    }
+    
     saveToken = async (token, { app_id, app_name }, user_id ) =>
     {
+        console.log ( 9 )
         try
         {
             const at_expires = new Date(token.accessTokenExpiresAt).toUTCString()
 
+                console.log(`
+                INSERT INTO 
+                    ${process.env.db_schema || `public`}.access_tokens
+                    ( access_token, expires, app_id, app_name, user_id )
+                VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
+                RETURNING access_token, expires, app_id, app_name, user_id
+            `)
             const [ access_token ] = await new Database().query(`
                 INSERT INTO 
                     ${process.env.db_schema || `public`}.access_tokens
@@ -229,6 +283,8 @@ class PGOAuth2Model
                 VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
                 RETURNING access_token, expires, app_id, app_name, user_id
             `)
+
+            console.log ( access_token )
 
             const rt_expires = new Date(token.refreshTokenExpiresAt).toUTCString()
 
@@ -246,7 +302,7 @@ class PGOAuth2Model
                 refresh_token: refresh_token.refresh_token,
                 access_token_expires_at: access_token.expires,
                 refresh_token_expires_at: refresh_token.expires,
-                scope: [`read`, `write`],
+                scope: [ `read`, `write` ],
                 client: access_token.app_name,
                 app_name: access_token.app_name,
                 user: access_token.user_id,
