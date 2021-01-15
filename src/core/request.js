@@ -10,7 +10,7 @@ export async function my_request(config)
     let request_url = config.url
     let method = config.method || 'get'
 
-    let headers = {'Authorization': process.env.zoho_authtoken}
+    let headers = {'Authorization': global.server.get(`zoho_authtoken`)}
     if(config.headers) headers =  config.headers
 
 

@@ -54,19 +54,27 @@ class Bootstrap
             {
                 try
                 {
-                    await _controller._init()
-                    const output = await _controller[method]()
+                    if ( typeof _controller[method] === `function` )
+                    {
+                        await _controller._init()
 
-                    if ( output.toString().startsWith(`<`) === true )
-                        res.set(`Content-type`, `text/html`)
-                    else if ( Boolean(res.get(`html`)) )
-                        res.set(`Content-type`, `text/html`)
-                    else if( Buffer.isBuffer(output) )
-                        res.set(`Content-type`, `application/pdf`)
+                        const output = await _controller[method]()
+
+                        if ( output.toString().startsWith(`<`) === true )
+                            res.set(`Content-type`, `text/html`)
+                        else if ( Boolean(res.get(`html`)) )
+                            res.set(`Content-type`, `text/html`)
+                        else if( Buffer.isBuffer(output) )
+                            res.set(`Content-type`, `application/pdf`)
+                        else
+                            res.set(`Content-type`, `application/json`)
+
+                        res.send(output).end()
+                    }
                     else
-                        res.set(`Content-type`, `application/json`)
-
-                    res.send(output).end()
+                    {
+                        res.json({code:100, message:`No function '${method}' found in controller '${class_name}'!`}).end()
+                    }
                 }
                 catch ( e )
                 {

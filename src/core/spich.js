@@ -14,10 +14,10 @@ import pack from '../../package.json'
 import mongoose from 'mongoose'
 
 
-if ( process.env.db_type === `mongo` )
+if ( global.server.get(`db_type`) === `mongo` )
 {
     mongoose.set(`useCreateIndex`, true)
-    mongoose.connect(process.env.mongo_uri,
+    mongoose.connect(global.server.get(`mongo_uri`),
     {
         useUnifiedTopology: true,
         useNewUrlParser: true,
@@ -65,13 +65,13 @@ class spich
 
             process.on(`uncaughtException`, (err) => console.error(err))
 
-            if ( process.env.enable_oauth === `true` )
+            if ( global.server.get(`enable_oauth`) )
             {
                 // await new structure().init()
 
                 global.client_names = []
 
-                if ( process.env.db_type === `mongo` )
+                if ( global.server.get(`db_type`) === `mongo` )
                 {
                     const result = await MongoOAuth2Model.load_applications()
 
@@ -82,9 +82,9 @@ class spich
                         model: MongoOAuth2Model
                     })
                 }
-                else if ( process.env.db_type === `postgres` )
+                else if ( global.server.get(`db_type`) === `postgres` )
                 {
-                    const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.db_schema || `public`}.applications`)
+                    const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${global.server.get(`db_schema`) || `public`}.applications`)
 
                     result.map(value => client_names.push(value.app_name))
 

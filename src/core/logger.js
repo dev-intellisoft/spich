@@ -6,7 +6,7 @@
 import accesslog from 'access-log'
 import fs from 'fs'
 import moment from 'moment'
-const debug = process.env.debug || 0
+const debug = global.server.get(`debug`) || 0
 
 class logger
 {

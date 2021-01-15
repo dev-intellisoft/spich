@@ -148,22 +148,22 @@ class  Database
     {
         try
         {
-            if ( process.env.db_type === `postgres` )
+            if ( global.server.get(`db_type`) === `postgres` )
             {
                 return new Promise(function (resolve, reject)
                 {
-                    const user = `${process.env.db_user || process.env.USER}`
-                    const pass = `${process.env.db_pass || ''}`
-                    const host = `${process.env.db_host || 'localhost'}`
-                    const base = `${process.env.db_base || ''}`
+                    const user = `${global.server.get(`db_user`) || process.env.USER}`
+                    const pass = `${global.server.get(`db_pass`) || ''}`
+                    const host = `${global.server.get(`db_host`) || 'localhost'}`
+                    const base = `${global.server.get(`db_base`) || ''}`
 
-                    if ( !process.env.db_user )
+                    if ( !global.server.get(`db_user`) )
                         logger.error(`Your '.env' file seem to have no database users '${process.env.USER}' will be take`)
-                    if ( !process.env.db_pass )
+                    if ( !global.server.get(`db_pass`) )
                         logger.error(`It seems in '.env' file have no password for database user '${user}', blank will be taken as default!`)
-                    if ( !process.env.db_host )
+                    if ( !global.server.get(`db_host`) )
                         logger.error(`No hostname was specified in your '.env' file '${host}' will be taken`)
-                    if ( !process.env.db_base )
+                    if ( !global.server.get(`db_base`) )
                         logger.error(`It seems you have no database set in your '.env' file blank will be taken`)
 
                     const config =
@@ -208,7 +208,7 @@ class  Database
                     })
                 })
             }
-            else if ( process.env.db_type === `mysql` )
+            else if ( global.server.get(`db_type`) === `mysql` )
             {
 
             }
