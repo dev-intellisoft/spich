@@ -63,7 +63,7 @@ class structure
         try
         {
             return await new Database().query(`
-                ALTER SEQUENCE nfe.app_id_seq OWNER TO ${process.env.db_user}
+                ALTER SEQUENCE app_id_seq OWNER TO ${process.env.db_user}
             `)
         }
         catch ( e )
@@ -336,7 +336,7 @@ class structure
                 await this.grant_refresh_token_permission()
 
                 await this.create_test_application()
-                await this.create_test_user()
+                // await this.create_test_user()
             }
         }
         catch ( e )
