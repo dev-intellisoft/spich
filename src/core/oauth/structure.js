@@ -146,7 +146,7 @@ class structure
                 CREATE TABLE IF NOT EXISTS ${process.env.db_schema || `public`}.access_tokens
                 (
                     access_token text COLLATE pg_catalog."default" NOT NULL,
-                    app text COLLATE pg_catalog."default" NOT NULL,
+                    app_name text COLLATE pg_catalog."default" NOT NULL,
                     user_id integer NOT NULL,
                     expires timestamp with time zone NOT NULL,
                     app_id integer NOT NULL,
