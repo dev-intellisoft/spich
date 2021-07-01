@@ -285,6 +285,8 @@ class structure
                                 "description":"String"
                             }))
 
+
+
                         new applications(
                             {
                                 "app_name":"test",
