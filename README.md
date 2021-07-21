@@ -322,8 +322,3 @@ export  default  Test
 >>Before start use model set your `.env` with your database configurations.
 >> if no configuration was set the framework will try to resolve "localhost" for `host`; the use started the node process will be take as database use for example `root` blanc will be take as password the port will be `5432`(default postgres port) and blank will be the datasource.
 
-
-
-
-
-*Credits to: FANTEM WAD TEAM*
