@@ -1,11 +1,11 @@
 #GETTING STARTED
 
-# OPP Framework
+# Spich Framework
 ---
 
 1. DIRECTORY STRUCTURE
 
-OPP Frame Work was made to solve code organization, keeping the code in MVC principles.
+Spich FrameWork was made to solve code organization, keeping the code in MVC principles.
 
 
 Folder Structures.

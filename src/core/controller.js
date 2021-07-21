@@ -24,5 +24,4 @@ class Controller extends Loader
     is_patch = () => (request.method === `PATCH`)
 }
 
-
 export default Controller

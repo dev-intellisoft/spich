@@ -85,9 +85,7 @@ class Loader
             new logger().error(e)
         }
     }
-
 }
-
 
 export default Loader
 
