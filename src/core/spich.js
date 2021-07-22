@@ -22,8 +22,6 @@ import pack from '../../package.json'
 
 import mongoose from 'mongoose'
 
-// import uuid from "uuid/v4"
-
 class Spich
 {
     async run()
