@@ -1,8 +1,8 @@
-import controller from './src/core/controller'
-import model from './src/core/model'
-import spich from './src/core/spich'
-import logger from './src/core/logger'
-import input from './src/core/input'
-import loader from './src/core/loader'
+import Controller from './src/core/controller'
+import Model from './src/core/model'
+import Spich from './src/core/spich'
+import Logger from './src/core/logger'
+import Input from './src/core/input'
+import Loader from './src/core/loader'
 
-export { spich, controller, model, logger, input, loader }
+export { Spich, Controller, Model, Logger, Input, Loader }
