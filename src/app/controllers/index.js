@@ -1,6 +1,6 @@
-import { controller } from 'spich'
+import { Controller } from 'spich'
 
-class {{controller}} extends controller
+class {{controller}} extends Controller
 {
     constructor (props)
     {

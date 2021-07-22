@@ -8,7 +8,7 @@ import fs from 'fs'
 import moment from 'moment'
 const debug = process.env.debug || 0
 
-class logger
+class Logger
 {
     access = (req, res) =>
     {
@@ -76,5 +76,5 @@ class logger
     }
 }
 
-export default logger
+export default Logger
 

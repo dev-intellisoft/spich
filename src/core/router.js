@@ -3,7 +3,7 @@
  */
 import fs from 'fs'
 import Input from '../core/input'
-import logger from "spich/src/core/logger"
+import Logger from "spich/src/core/logger"
 
 let routes = []
 
@@ -24,7 +24,7 @@ class Router
         }
         catch (e)
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -44,7 +44,7 @@ class Router
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -188,7 +188,7 @@ class Router
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 }

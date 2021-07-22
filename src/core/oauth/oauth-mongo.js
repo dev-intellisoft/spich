@@ -1,6 +1,6 @@
 import Database from '../database'
 import bcrypt from 'bcryptjs'
-import logger from '../logger'
+import Logger from '../logger'
 
 class MongoOAuth2Model
 {
@@ -24,7 +24,7 @@ class MongoOAuth2Model
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -73,7 +73,7 @@ class MongoOAuth2Model
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -92,7 +92,7 @@ class MongoOAuth2Model
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -125,7 +125,7 @@ class MongoOAuth2Model
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
 
     }

@@ -2,7 +2,7 @@
  * Created by wellington on 08/08/2017.
  */
 
-import logger from './logger'
+import Logger from './logger'
 import Router from '../core/router'
 
 class Bootstrap
@@ -16,7 +16,7 @@ class Bootstrap
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -29,7 +29,7 @@ class Bootstrap
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -71,7 +71,7 @@ class Bootstrap
                 catch ( e )
                 {
                     console.log ( e )
-                    new logger().error(e)
+                    new Logger().error(e)
                     //todo module does not exists return and log
                     res.json({code:100, message:`No function '${method}' found in controller '${class_name}'!`}).end()
                 }
@@ -79,7 +79,7 @@ class Bootstrap
             else
             {
                 console.log ( e )
-                new logger().error(e)
+                new Logger().error(e)
                 res.json({code:100, message:`Application '${applications.accessed}' have no permission!`}).end()
             }
         }
@@ -87,7 +87,7 @@ class Bootstrap
         {
 
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -108,7 +108,7 @@ class Bootstrap
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 }

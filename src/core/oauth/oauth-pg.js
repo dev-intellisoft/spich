@@ -3,7 +3,7 @@
  */
 
 import Database from '../database'
-import logger from '../logger'
+import Logger from '../logger'
 import fs from 'fs'
 
 class PGOAuth2Model
@@ -30,7 +30,7 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -44,7 +44,7 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -70,7 +70,7 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -100,7 +100,7 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -129,7 +129,7 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -184,7 +184,7 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
             return e
         }
     }
@@ -250,7 +250,7 @@ class PGOAuth2Model
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 

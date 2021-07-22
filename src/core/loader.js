@@ -4,7 +4,7 @@
 
 
 import loadable from './loadable'
-import logger from './logger'
+import Logger from './logger'
 
 import mustache from  'mustache'
 import fs from 'fs'
@@ -22,7 +22,7 @@ class Loader
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -37,7 +37,7 @@ class Loader
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -52,7 +52,7 @@ class Loader
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -65,7 +65,7 @@ class Loader
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -82,7 +82,7 @@ class Loader
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 }

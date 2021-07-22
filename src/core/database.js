@@ -9,7 +9,7 @@
 
 import mongoose from 'mongoose'
 import fs from 'fs'
-import logger from './logger'
+import Logger from './logger'
 import Pool from 'pg-pool'
 
 
@@ -46,7 +46,7 @@ class  Database
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -62,7 +62,7 @@ class  Database
         }
         catch (e)
         {
-            new logger().error(e)
+            new Logger().error(e)
             return e
         }
     }
@@ -80,7 +80,7 @@ class  Database
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
             return e
         }
     }
@@ -95,7 +95,7 @@ class  Database
         }
         catch (e)
         {
-            new logger().error(e)
+            new Logger().error(e)
             return e
         }
     }
@@ -112,7 +112,7 @@ class  Database
         }
         catch (e)
         {
-            new logger().error(e)
+            new Logger().error(e)
             return e
         }
     }
@@ -130,7 +130,7 @@ class  Database
         }
         catch (e)
         {
-            new logger().error(e)
+            new Logger().error(e)
             return e
         }
     }
@@ -149,13 +149,13 @@ class  Database
                     const base = `${process.env.db_base || ''}`
 
                     if ( !process.env.db_user )
-                        logger.error(`Your '.env' file seem to have no database users '${process.env.USER}' will be take`)
+                        Logger.error(`Your '.env' file seem to have no database users '${process.env.USER}' will be take`)
                     if ( !process.env.db_pass )
-                        logger.error(`It seems in '.env' file have no password for database user '${user}', blank will be taken as default!`)
+                        Logger.error(`It seems in '.env' file have no password for database user '${user}', blank will be taken as default!`)
                     if ( !process.env.db_host )
-                        logger.error(`No hostname was specified in your '.env' file '${host}' will be taken`)
+                        Logger.error(`No hostname was specified in your '.env' file '${host}' will be taken`)
                     if ( !process.env.db_base )
-                        logger.error(`It seems you have no database set in your '.env' file blank will be taken`)
+                        Logger.error(`It seems you have no database set in your '.env' file blank will be taken`)
 
                     const config =
                         {
@@ -180,9 +180,9 @@ class  Database
                         if (err)
                         {
                             console.log(err)
-                            new logger().log_query(sql)
+                            new Logger().log_query(sql)
 
-                            new logger().error(`You have some error while try to run "${sql}" in your database!`)
+                            new Logger().error(`You have some error while try to run "${sql}" in your database!`)
 
                             if ( err.code === `28000` )
                                 resolve({ code:err.code, message:`INVALID AUTHORIZATION SPECIFICATION` })
@@ -193,7 +193,7 @@ class  Database
                         {
                             if ( typeof result === undefined ) resolve([])
 
-                            new logger().log_query(sql)
+                            new Logger().log_query(sql)
                             resolve(result.rows)
                         }
                     })
@@ -211,7 +211,7 @@ class  Database
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 }

@@ -1,0 +1,13 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon -w ../modules/spich/src/core -w index.js -w socket.js -w controllers -w models -w libs --exec \"node  --es-module-specifier-resolution=node --unhandled-rejections=none index.js\""
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0"
+  }
+}

@@ -2,7 +2,7 @@
  * Created by wellington on 15/11/2017.
  */
 
-import logger from './logger'
+import Logger from './logger'
 
 class Input
 {
@@ -23,7 +23,7 @@ class Input
         catch ( e )
         {
             console.log ( e )
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -63,7 +63,7 @@ class Input
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -83,7 +83,7 @@ class Input
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -103,7 +103,7 @@ class Input
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -145,7 +145,7 @@ class Input
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 
@@ -167,7 +167,7 @@ class Input
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 

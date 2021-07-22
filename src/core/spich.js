@@ -16,7 +16,7 @@ import PGOAuth2Model from './oauth/oauth-pg'
 import MongoOAuth2Model from './oauth/oauth-mongo'
 import structure from './oauth/structure'
 import socketio from 'socket.io'
-import logger from './logger'
+import Logger from './logger'
 import fileUpload from 'express-fileupload'
 import pack from '../../package.json'
 
@@ -24,7 +24,7 @@ import mongoose from 'mongoose'
 
 // import uuid from "uuid/v4"
 
-class spich
+class Spich
 {
     async run()
     {
@@ -88,7 +88,7 @@ class spich
                 server.listen(port)
                 console.log(`######################################################################`)
                 console.log(`#                      Welcome  to ${project.name}                           #`)
-                console.log(`#      Description ${project.description}                            #`)
+                console.log(`#      Description ${project.description?project.description:`(no description)`}                            #`)
                 console.log(`#      This server is running on port ${port} in SSL Mode                 #`)
                 console.log(`#      Powered by ${pack.name} (${pack.version})                     #`)
                 console.log(`######################################################################`)
@@ -102,9 +102,9 @@ class spich
 
                 console.log(`######################################################################`)
                 console.log(`#                      Welcome  to ${project.name}                           #`)
-                console.log(`#      Description ${project.description}                            #`)
+                console.log(`#      Description ${project.description?project.description:`(no description)`}                             #`)
                 console.log(`#      This server is running on port ${port} in NO SSL Mode               #`)
-                console.log(`#      Powered by ${pack.name} (${pack.version})                      #`)
+                console.log(`#      Powered by ${pack.name} (${pack.version})                                      #`)
                 console.log(`######################################################################`)
             }
 
@@ -141,8 +141,7 @@ class spich
 
                     result.map(value => client_names.push(value.app_name))
 
-                    app.oauth = new OAuth2Server(
-                    {
+                    app.oauth = new OAuth2Server({
                         model: MongoOAuth2Model
                     })
                 }
@@ -165,7 +164,7 @@ class spich
                     {
                         try
                         {
-                            new logger().access(req, res)
+                            new Logger().access(req, res)
                             res.send(
                                 await app.oauth.token(new Request(req), new Response(res))
                             )
@@ -181,7 +180,7 @@ class spich
                 {
                     if ( await new Bootstrap().is_public_route(req) || await new Bootstrap().is_static_route(req) )
                     {
-                        new logger().access(req, res)
+                        new Logger().access(req, res)
                         await new Bootstrap().run(req, res)
                     }
                     else
@@ -196,14 +195,14 @@ class spich
                         try
                         {
                             req.oauth = await app.oauth.authenticate(new Request(req), new Response(res))
-                            new logger().access(req, res)
+                            new Logger().access(req, res)
 
                             await new Bootstrap().run(req, res)
                         }
                         catch ( e )
                         {
-                            new logger().access(req, res)
-                            new logger().error(e)
+                            new Logger().access(req, res)
+                            new Logger().error(e)
                             res.status(e.status).send(e)
                         }
                     }
@@ -216,9 +215,9 @@ class spich
         }
         catch ( e )
         {
-            new logger().error(e)
+            new Logger().error(e)
         }
     }
 }
 
-export default spich
+export default Spich

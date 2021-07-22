@@ -1,6 +1,6 @@
-import { model } from 'spich'
+import { Model } from 'spich'
 
-class {{model}} extends model
+class {{model}} extends Model
 {
     constructor(props)
     {
