@@ -48,7 +48,7 @@ By the default will
 
 3.0 CONTROLLERS
 
-Controllers will be always the entry point of flow to create a controller simply create a javascript class in the controllers directory like bellow:
+Controllers will be always the entry point of flow to create a controller simply create a javascript class at controller directory like bellow:
 ````javascript
 class Test
 {
@@ -60,7 +60,7 @@ export  default  Test
 3.1 REGISTERS
 
 Once you have created you first controller you need register it into the application.
-You can to that by import you controller class to `register.js` file, like bellow:
+You can to that by import your controller class to `register.js` file, like bellow:
 
 ````javascript
 import  Test from './app/controllers/test'
@@ -71,19 +71,19 @@ export default
     'test':Test
 }
 ````
-In this point will be possible to make the follow resquest to server
+In this point will be possible to make the follow request to server
 
 ````curl
 /test
 ````
-as no function was passed the server will return the follow error:
+as no function passed the server will return the follow error:
 ````json
 {
     "code": 100,
     "message": "No function 'index' found in controller 'test'!"
 }
 ````
-if no function was informed the framework will assume `index` as function, to solve this you can simply create the follow function in your recent created controller class:
+if no function informed the framework will assume `index` as function, to solve this you can simply create the follow function in your recent created controller class:
 ````javascript
 class Test
 {
@@ -95,7 +95,7 @@ class Test
 
 export  default  Test
 ````
-To call a specific function in my controller you can simple:
+To call a specific function in my controller you can simply:
 
 ````curl
 /test/my_function
@@ -114,13 +114,13 @@ export  default  Test
 
 4.0 ROUTERS
 
-The intention of routers will be shift the program flow from default controller to another controller.
+The intention of routers is to shift the program flow from default controller to another controller.
 
 How it works?
 
 You can edit the file `app/.conf/routers.json`.
 
-If this files not exits  you can create it.
+If this files not exits, you can create it.
 ````json
 {
   "/<route controller>[/<route function>]":"/<target controller>[/<targer function>/<arg1>/...]"
@@ -156,7 +156,7 @@ export default ControllerB
 }
 ````
 
-as result we will get the follow output string:
+as result, we will get the follow output string:
 
  `"I am in Controller B"`
 
@@ -207,10 +207,10 @@ the result will be:
 
 6.0 LIBRARIES
 
-Libraries was designed to:
+Libraries were design to:
 
 * Computer common logic.
-* Place complex logic, (let the controllers more clean and easy to matain).
+* Place complex logic, (let the controllers more clean and easy to maintain).
 * Access data from data sources outer system.
 
 
@@ -229,12 +229,6 @@ class Test_Lib
 
 export default Test_Lib
 ````
-
-> **NOTE**:
->All libraries as controllers must be registered to be ready for use.
-
-> **NOTE**:
->Use `async` method  only when your data is on external sources.
 
 6.2 LOADER AND USING LIBRARIES
 
@@ -316,9 +310,9 @@ class Test extends Controller
 export  default  Test
 ````
 >**NOTE**:
->>As a good pratice solve all your SQL names in your models.
+>>A good practice solve all your SQL names in your models.
 
 >**NOTE**:
 >>Before start use model set your `.env` with your database configurations.
->> if no configuration was set the framework will try to resolve "localhost" for `host`; the use started the node process will be take as database use for example `root` blanc will be take as password the port will be `5432`(default postgres port) and blank will be the datasource.
+>> if no configuration set the framework will try to resolve "localhost" for `host`; the use started the node process will be taken as database use for example `root` blank will be taken password. the port will be `5432`(default postgres port) and blank will be the datasource.
 
