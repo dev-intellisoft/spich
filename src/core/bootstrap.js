@@ -55,7 +55,7 @@ class Bootstrap
                 try
                 {
                     await _controller._init()
-                    const output = await _controller[method].apply(this, params)
+                    const output = await _controller[method].apply(_controller, params)
 
                     if ( output.toString().startsWith(`<`) === true )
                         res.set(`Content-type`, `text/html`)
@@ -78,16 +78,15 @@ class Bootstrap
             }
             else
             {
-                console.log ( e )
-                new Logger().error(e)
+                // console.log ( e )
+                // new Logger().error(e)
                 res.json({code:100, message:`Application '${applications.accessed}' have no permission!`}).end()
             }
         }
         catch ( e )
         {
-
-            console.log ( e )
             new Logger().error(e)
+            return e
         }
     }
 }
