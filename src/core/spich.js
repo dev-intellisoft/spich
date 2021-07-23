@@ -43,10 +43,10 @@ class Spich
         try
         {
 
-            if ( process.env.db_type === `mongo` )
+            if ( process.env.DB_TYPE === `mongo` )
             {
                 mongoose.set(`useCreateIndex`, true)
-                mongoose.connect(process.env.mongo_uri, {
+                mongoose.connect(process.env.MONGO_URI, {
                     useUnifiedTopology: true,
                     useNewUrlParser: true,
                     useFindAndModify:false
@@ -75,15 +75,15 @@ class Spich
 
             global.connections = 0
 
-            if ( process.env.ssl === `true` )
+            if ( process.env.SSL === `true` )
             {
-                 this.#port = process.env.server_port || 443
+                 this.#port = process.env.SERVER_PORT || 443
 
                 const credentials =
                 {
-                    key: fs.readFileSync(process.env.ssl_key, process.env.ssl_charset),
-                    cert: fs.readFileSync(process.env.ssl_cert, process.env.ssl_charset),
-                    passphrase: process.env.ssl_pass
+                    key: fs.readFileSync(process.env.SSL_KEY, process.env.SSL_CHARSET),
+                    cert: fs.readFileSync(process.env.SSL_CERT, process.env.SSL_CHARSET),
+                    passphrase: process.env.SSL_PASS
                 }
 
                  this.#server = https.createServer(credentials, this.#app) //added
@@ -98,7 +98,7 @@ class Spich
             }
             else
             {
-                this.#port = process.env.server_port || 80
+                this.#port = process.env.SERVER_PORT || 80
 
                 this.#server = http.createServer(this.#app)
                 this.#server.listen(this.#port)
@@ -132,13 +132,13 @@ class Spich
 
             process.on(`uncaughtException`, (err) => console.error(err))
 
-            if ( process.env.enable_oauth === `true` )
+            if ( process.env.ENABLE_OAUTH === `true` )
             {
                 await new structure().init()
 
                 global.client_names = []
 
-                if ( process.env.db_type === `mongo` )
+                if ( process.env.DB_TYPE === `mongo` )
                 {
                     const result = await MongoOAuth2Model.load_applications()
 
@@ -146,9 +146,9 @@ class Spich
 
                     this.#app.oauth = new OAuth2Server({ model: MongoOAuth2Model })
                 }
-                else if ( process.env.db_type === `postgres` )
+                else if ( process.env.DB_TYPE === `postgres` )
                 {
-                    const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.db_schema || `public`}.applications`)
+                    const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.DB_SCHEMA || `public`}.applications`)
 
                     result.map(value => client_names.push(value.app_name))
 

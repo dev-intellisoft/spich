@@ -9,7 +9,7 @@ class structure
         try
         {
             return await new Database().query(`
-                CREATE SEQUENCE IF NOT EXISTS ${process.env.db_schema || `public`}.app_id_seq
+                CREATE SEQUENCE IF NOT EXISTS ${process.env.DB_SCHEMA || `public`}.app_id_seq
                 INCREMENT 1
                 MAXVALUE 9223372036854775807
                 CACHE 1
@@ -26,7 +26,7 @@ class structure
         try
         {
             return await new Database().query(`
-                CREATE TABLE IF NOT EXISTS ${process.env.db_schema || `public`}.applications
+                CREATE TABLE IF NOT EXISTS ${process.env.DB_SCHEMA || `public`}.applications
                 (
                     app_id integer NOT NULL DEFAULT nextval('app_id_seq'::regclass),
                     app_name text COLLATE pg_catalog."default" NOT NULL,
@@ -49,7 +49,7 @@ class structure
         try
         {
             return await new Database().query(`
-                ALTER TABLE ${process.env.db_schema || `public`}.applications OWNER to ${process.env.db_user}
+                ALTER TABLE ${process.env.DB_SCHEMA || `public`}.applications OWNER to ${process.env.DB_USER}
             `)
         }
         catch ( e )
@@ -63,7 +63,7 @@ class structure
         try
         {
             return await new Database().query(`
-                ALTER SEQUENCE app_id_seq OWNER TO ${process.env.db_user}
+                ALTER SEQUENCE app_id_seq OWNER TO ${process.env.DB_USER}
             `)
         }
         catch ( e )
@@ -77,7 +77,7 @@ class structure
         try
         {
             return await  new Database().query(`
-                CREATE SEQUENCE IF NOT EXISTS ${process.env.db_schema || `public`}.user_id_seq
+                CREATE SEQUENCE IF NOT EXISTS ${process.env.DB_SCHEMA || `public`}.user_id_seq
                 INCREMENT 1
                 MAXVALUE 9223372036854775807
                 CACHE 1
@@ -94,7 +94,7 @@ class structure
         try
         {
             return await new Database().query(`
-                CREATE TABLE IF NOT EXISTS ${process.env.db_schema || `public`}.users
+                CREATE TABLE IF NOT EXISTS ${process.env.DB_SCHEMA || `public`}.users
                 (
                     user_id integer NOT NULL DEFAULT nextval('user_id_seq'::regclass),
                     username text COLLATE pg_catalog."default" NOT NULL,
@@ -115,7 +115,7 @@ class structure
         try
         {
             return await new Database().query(`
-                ALTER TABLE ${process.env.db_schema || `public`}.users OWNER to ${process.env.db_user}
+                ALTER TABLE ${process.env.DB_SCHEMA || `public`}.users OWNER to ${process.env.DB_USER}
             `)
         }
         catch ( e )
@@ -129,7 +129,7 @@ class structure
         try
         {
             return await new Database().query(`
-                ALTER SEQUENCE IF EXISTS ${process.env.db_schema || `public`}.user_id_seq OWNER TO ${process.env.db_user}
+                ALTER SEQUENCE IF EXISTS ${process.env.DB_SCHEMA || `public`}.user_id_seq OWNER TO ${process.env.DB_USER}
             `)
         }
         catch ( e )
@@ -143,7 +143,7 @@ class structure
         try
         {
             return await new Database().query(`
-                CREATE TABLE IF NOT EXISTS ${process.env.db_schema || `public`}.access_tokens
+                CREATE TABLE IF NOT EXISTS ${process.env.DB_SCHEMA || `public`}.access_tokens
                 (
                     access_token text COLLATE pg_catalog."default" NOT NULL,
                     app_name text COLLATE pg_catalog."default" NOT NULL,
@@ -151,11 +151,11 @@ class structure
                     expires timestamp with time zone NOT NULL,
                     app_id integer NOT NULL,
                     CONSTRAINT app_id_fk FOREIGN KEY (app_id)
-                        REFERENCES ${process.env.db_schema || `public`}.applications (app_id) MATCH SIMPLE
+                        REFERENCES ${process.env.DB_SCHEMA || `public`}.applications (app_id) MATCH SIMPLE
                         ON UPDATE NO ACTION
                         ON DELETE NO ACTION,
                     CONSTRAINT user_id_fk FOREIGN KEY (user_id)
-                        REFERENCES ${process.env.db_schema || `public`}.users (user_id) MATCH SIMPLE
+                        REFERENCES ${process.env.DB_SCHEMA || `public`}.users (user_id) MATCH SIMPLE
                         ON UPDATE NO ACTION
                         ON DELETE NO ACTION
                 )
@@ -172,7 +172,7 @@ class structure
         try
         {
             return await new Database().query(`
-                ALTER TABLE ${process.env.db_schema || `public`}.access_tokens OWNER to ${process.env.db_user};
+                ALTER TABLE ${process.env.DB_SCHEMA || `public`}.access_tokens OWNER to ${process.env.DB_USER};
             `)
         }
         catch ( e )
@@ -186,7 +186,7 @@ class structure
         try
         {
             return await new Database().query(`
-                CREATE TABLE IF NOT EXISTS ${process.env.db_schema || `public`}.refresh_tokens
+                CREATE TABLE IF NOT EXISTS ${process.env.DB_SCHEMA || `public`}.refresh_tokens
                 (
                     app_id integer NOT NULL,
                     user_id integer NOT NULL,
@@ -207,7 +207,7 @@ class structure
         try
         {
             return await new Database().query(`
-                ALTER TABLE ${process.env.db_schema || `public`}.refresh_tokens OWNER to ${process.env.db_user};
+                ALTER TABLE ${process.env.DB_SCHEMA || `public`}.refresh_tokens OWNER to ${process.env.DB_USER};
             `)
         }
         catch ( e )
@@ -221,12 +221,12 @@ class structure
         try
         {
             return await new Database().query(`
-                INSERT INTO ${process.env.db_schema || `public`}.users
+                INSERT INTO ${process.env.DB_SCHEMA || `public`}.users
                     ( username, email, password )
                 SELECT 'test', 'test@test.com', MD5('test')
                 WHERE
                     NOT EXISTS (
-                        SELECT user_id FROM ${process.env.db_schema || `public`}.users 
+                        SELECT user_id FROM ${process.env.DB_SCHEMA || `public`}.users 
                         WHERE username = 'test' AND email = 'test@test.com'
                     );
             `)
@@ -243,10 +243,10 @@ class structure
         {
             return await  new Database().query(`
                 INSERT INTO 
-                    ${process.env.db_schema || `public`}.applications( app_name, app_secret, description ) 
+                    ${process.env.DB_SCHEMA || `public`}.applications( app_name, app_secret, description ) 
                 SELECT 'test', MD5('test'), 'test' WHERE NOT EXISTS 
                 (
-                    SELECT app_id from ${process.env.db_schema || `public`}.applications 
+                    SELECT app_id from ${process.env.DB_SCHEMA || `public`}.applications 
                     WHERE app_name = 'test'
                 )
             `)
@@ -261,9 +261,9 @@ class structure
     {
         try
         {
-            if ( process.env.db_type === `mongo` )
+            if ( process.env.DB_TYPE === `mongo` )
             {
-                mongoose.connect(process.env.mongo_uri, {
+                mongoose.connect(process.env.MONGO_URI, {
                     useNewUrlParser: true,
                     useUnifiedTopology: true
                 })
@@ -319,7 +319,7 @@ class structure
                         await mongoose.connection.db.createCollection(`refresh_tokens`)
                 })
             }
-            else if ( process.env.db_type === `postgres` )
+            else if ( process.env.DB_TYPE === `postgres` )
             {
                 await this.create_application_sequence()
                 await this.create_application_table()

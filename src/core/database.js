@@ -139,33 +139,16 @@ class  Database
     {
         try
         {
-            if ( process.env.db_type === `postgres` )
+            if ( process.env.DB_TYPE === `postgres` )
             {
                 return new Promise(function (resolve, reject)
                 {
-                    const user = `${process.env.db_user || process.env.USER}`
-                    const pass = `${process.env.db_pass || ''}`
-                    const host = `${process.env.db_host || 'localhost'}`
-                    const base = `${process.env.db_base || ''}`
+                    const user = `${process.env.DB_USER || process.env.USER}`
+                    const password = `${process.env.DB_PASS || ''}`
+                    const host = `${process.env.DB_HOST || 'localhost'}`
+                    const database = `${process.env.DB_BASE || ''}`
 
-                    if ( !process.env.db_user )
-                        Logger.error(`Your '.env' file seem to have no database users '${process.env.USER}' will be take`)
-                    if ( !process.env.db_pass )
-                        Logger.error(`It seems in '.env' file have no password for database user '${user}', blank will be taken as default!`)
-                    if ( !process.env.db_host )
-                        Logger.error(`No hostname was specified in your '.env' file '${host}' will be taken`)
-                    if ( !process.env.db_base )
-                        Logger.error(`It seems you have no database set in your '.env' file blank will be taken`)
-
-                    const config =
-                        {
-                            user:user,
-                            password:pass,
-                            host:host,
-                            database:base,
-                            max:10,
-                            idleTimeoutMillis: 1000,
-                        }
+                    const config = { user, password, host, database, max:10, idleTimeoutMillis: 1000 }
 
                     const pool = new Pool(config)
 
@@ -199,7 +182,7 @@ class  Database
                     })
                 })
             }
-            else if ( process.env.db_type === `mysql` )
+            else if ( process.env.DB_TYPE === `mysql` )
             {
 
             }

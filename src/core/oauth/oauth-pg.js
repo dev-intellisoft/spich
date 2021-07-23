@@ -16,7 +16,7 @@ class PGOAuth2Model
                 SELECT 
                     app_id, app_name, app_secret, redirect_uri
                 FROM 
-                    ${process.env.db_schema || `public`}.applications 
+                    ${process.env.DB_SCHEMA || `public`}.applications 
                 WHERE 
                     app_name = '${client_id}' 
                 AND 
@@ -56,7 +56,7 @@ class PGOAuth2Model
                 SELECT 
                     user_id 
                 FROM 
-                    ${process.env.db_schema || `public`}.users 
+                    ${process.env.DB_SCHEMA || `public`}.users 
                 WHERE 
                     email = '${username}' 
                 AND 
@@ -78,17 +78,17 @@ class PGOAuth2Model
     {
         try
         {
-            const timezone = process.env.timezone || 'GMT'
+            const timezone = process.env.TIMEZONE || 'GMT'
             if(user_id.id) user_id = user_id.id
             expires = expires.toString().replace(/GMT.*$/,  timezone)
 
             const sql = `
                 INSERT INTO 
-                    ${process.env.db_schema || `public`}.refresh_tokens(app_id, user_id, app_name, refresh_token, expires)
+                    ${process.env.DB_SCHEMA || `public`}.refresh_tokens(app_id, user_id, app_name, refresh_token, expires)
                 SELECT 
                     app_id, '${user_id}', app_name, '${refresh_token}', '${expires}'  
                 FROM 
-                    ${process.env.db_schema || `public`}.applications 
+                    ${process.env.DB_SCHEMA || `public`}.applications 
                 WHERE 
                     app_name = '${client_id}'
             `
@@ -108,18 +108,18 @@ class PGOAuth2Model
     {
         try
         {
-            const timezone = process.env.timezone || 'GMT'
+            const timezone = process.env.TIMEZONE || 'GMT'
             if(user_id.id) user_id = user_id.id
             expires = expires.toString().replace(/GMT.*$/, timezone)
             const sql = `
                 INSERT INTO 
-                    ${process.env.db_schema || `public`}.access_tokens(
+                    ${process.env.DB_SCHEMA || `public`}.access_tokens(
                         app_id, user_id, access_token, app_name,  expires
                     )
                 SELECT 
                     app_id, '${user_id}', '${access_token}', app_name, '${expires}'
                 FROM 
-                    ${process.env.db_schema || `public`}.applications 
+                    ${process.env.DB_SCHEMA || `public`}.applications 
                 WHERE 
                     app_name = '${client_id}'
             `
@@ -152,9 +152,9 @@ class PGOAuth2Model
                 SELECT 
                     at.access_token, at.app_name, at.expires, at.user_id, at.app_id
                 FROM 
-                    ${process.env.db_schema || `public`}.access_tokens at
+                    ${process.env.DB_SCHEMA || `public`}.access_tokens at
                 LEFT JOIN 
-                    ${process.env.db_schema || `public`}.users u 
+                    ${process.env.DB_SCHEMA || `public`}.users u 
                 ON 
                     u.user_id = at.user_id
                 WHERE 
@@ -208,7 +208,7 @@ class PGOAuth2Model
                 SELECT 
                     refresh_token, app_name, expires, user_id 
                 FROM 
-                    ${process.env.db_schema || `public`}.refresh_tokens 
+                    ${process.env.DB_SCHEMA || `public`}.refresh_tokens 
                 WHERE 
                     refresh_token = '${bearer_token}'
             `
@@ -219,7 +219,7 @@ class PGOAuth2Model
                 SELECT 
                     app_id, app_name
                 FROM 
-                    ${process.env.db_schema || `public`}.applications
+                    ${process.env.DB_SCHEMA || `public`}.applications
                 WHERE 
                     app_name = '${result.app_name}'
             `
@@ -231,7 +231,7 @@ class PGOAuth2Model
                 SELECT 
                     *
                 FROM
-                    ${process.env.db_schema || `public`}.users
+                    ${process.env.DB_SCHEMA || `public`}.users
                 WHERE   
                     user_id = ${result.user_id}
             `
@@ -271,14 +271,14 @@ class PGOAuth2Model
 
                 console.log(`
                 INSERT INTO 
-                    ${process.env.db_schema || `public`}.access_tokens
+                    ${process.env.DB_SCHEMA || `public`}.access_tokens
                     ( access_token, expires, app_id, app_name, user_id )
                 VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
                 RETURNING access_token, expires, app_id, app_name, user_id
             `)
             const [ access_token ] = await new Database().query(`
                 INSERT INTO 
-                    ${process.env.db_schema || `public`}.access_tokens
+                    ${process.env.DB_SCHEMA || `public`}.access_tokens
                     ( access_token, expires, app_id, app_name, user_id )
                 VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
                 RETURNING access_token, expires, app_id, app_name, user_id
@@ -290,7 +290,7 @@ class PGOAuth2Model
 
             const [ refresh_token ] = await new Database().query(`
                 INSERT INTO
-                    ${process.env.db_schema || `public`}.refresh_tokens
+                    ${process.env.DB_SCHEMA || `public`}.refresh_tokens
                     ( refresh_token, expires, app_id, app_name , user_id )
                 VALUES( '${token.refreshToken}', '${rt_expires}', ${app_id}, '${app_name}', ${user_id} )
                 RETURNING refresh_token, expires, app_id, app_name , user_id
