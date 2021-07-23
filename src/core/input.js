@@ -107,26 +107,6 @@ class Input
         }
     }
 
-    params = key =>
-    {
-        try
-        {
-            if(typeof key === 'object')
-            {
-                for (const blah in key) parameters[`${blah}`] = key[blah]
-            }
-            else
-            {
-                if(!key)  return parameters
-                else return parameters[`${key}`]
-            }
-        }
-        catch ( e )
-        {
-            new logger().error(e)
-        }
-    }
-
     oauth = key =>
     {
         try

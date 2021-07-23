@@ -48,14 +48,14 @@ class Bootstrap
                 return res.json({code:100, message:`Server Error!`}).end()
             }
 
-            const { class_name, _controller, method, permission, applications } = config
+            const { class_name, _controller, method, permission, applications, params } = config
 
             if ( permission )
             {
                 try
                 {
                     await _controller._init()
-                    const output = await _controller[method]()
+                    const output = await _controller[method].apply(this, params)
 
                     if ( output.toString().startsWith(`<`) === true )
                         res.set(`Content-type`, `text/html`)
@@ -86,27 +86,6 @@ class Bootstrap
         catch ( e )
         {
 
-            console.log ( e )
-            new Logger().error(e)
-        }
-    }
-
-    get_params_names(func)
-    {
-        try
-        {
-            const strip_comments = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
-            const argument_names = /([^\s,]+)/g;
-
-            const fn_str = func.toString().replace(strip_comments, ``);
-            let result = fn_str.slice(fn_str.indexOf(`(`)+1, fn_str.indexOf(`)`)).match(argument_names);
-
-            if(result === null) result = [];
-
-            return result;
-        }
-        catch ( e )
-        {
             console.log ( e )
             new Logger().error(e)
         }
