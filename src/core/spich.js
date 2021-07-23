@@ -21,9 +21,15 @@ import fileUpload from 'express-fileupload'
 import pack from '../../package.json'
 
 import mongoose from 'mongoose'
+import Router from "./router";
 
 class Spich
 {
+    #config
+    #app = express()
+    #project
+    #server
+    #port = 80
     async run()
     {
         global.CTL_PATH = `${APP_PATH}/controllers`
@@ -47,23 +53,22 @@ class Spich
                 })
             }
 
-            const app = express()
-            app.use(helmet())
-            app.disable(`x-powered-by`)
-            app.set(`trust_proxy`, true);
-            app.use(cors())
-            app.use(bodyParser.json())
-            app.use(bodyParser.text())
-            app.use(bodyParser.urlencoded({extended: false}))
-            app.use(fileUpload())
-            app.use('/uploads', express.static(UPLOADS_PATH))
+            this.#app.use(helmet())
+            this.#app.disable(`x-powered-by`)
+            this.#app.set(`trust_proxy`, true);
+            this.#app.use(cors())
+            this.#app.use(bodyParser.json())
+            this.#app.use(bodyParser.text())
+            this.#app.use(bodyParser.urlencoded({extended: false}))
+            this.#app.use(fileUpload())
+            this.#app.use('/uploads', express.static(UPLOADS_PATH))
 
-            let project = await import(`${APP_PATH}/package.json`)
-            if ( project.default )
-                project = project.default
+            this.#project = await import(`${APP_PATH}/package.json`)
+            if ( this.#project.default )
+                this.#project = this.#project.default
 
-            if ( project.version )
-                global.PROJECT_VERSION = project.version
+            if ( this.#project.version )
+                global.PROJECT_VERSION = this.#project.version
 
             if ( pack.version )
                 global.SPICH_VERSION = pack.version
@@ -72,7 +77,7 @@ class Spich
 
             if ( process.env.ssl === `true` )
             {
-                const port = process.env.server_port || 443
+                 this.#port = process.env.server_port || 443
 
                 const credentials =
                 {
@@ -81,33 +86,33 @@ class Spich
                     passphrase: process.env.ssl_pass
                 }
 
-                var server = https.createServer(credentials, app) //added
+                 this.#server = https.createServer(credentials, this.#app) //added
 
-                server.listen(port)
+                this.#server.listen(this.#port)
                 console.log(`######################################################################`)
-                console.log(`#                      Welcome  to ${project.name}                           #`)
-                console.log(`#      Description ${project.description?project.description:`(no description)`}                            #`)
-                console.log(`#      This server is running on port ${port} in SSL Mode                 #`)
+                console.log(`#                      Welcome  to ${this.#project.name}                           #`)
+                console.log(`#      Description ${this.#project.description?this.#project.description:`(no description)`}                            #`)
+                console.log(`#      This server is running on port ${this.#port} in SSL Mode                 #`)
                 console.log(`#      Powered by ${pack.name} (${pack.version})                     #`)
                 console.log(`######################################################################`)
             }
             else
             {
-                const port = process.env.server_port || 80
+                this.#port = process.env.server_port || 80
 
-                var server = http.createServer(app)
-                server.listen(port)
+                this.#server = http.createServer(this.#app)
+                this.#server.listen(this.#port)
 
                 console.log(`######################################################################`)
-                console.log(`#                      Welcome  to ${project.name}                           #`)
-                console.log(`#      Description ${project.description?project.description:`(no description)`}                             #`)
-                console.log(`#      This server is running on port ${port} in NO SSL Mode               #`)
+                console.log(`#                      Welcome  to ${this.#project.name}                           #`)
+                console.log(`#      Description ${this.#project.description?this.#project.description:`(no description)`}                             #`)
+                console.log(`#      This server is running on port ${this.#port} in NO SSL Mode               #`)
                 console.log(`#      Powered by ${pack.name} (${pack.version})                                      #`)
                 console.log(`######################################################################`)
             }
 
 
-            global.io = socketio(server)
+            global.io = socketio(this.#server)
 
             io.on('connection', (socket) =>
             {
@@ -139,9 +144,7 @@ class Spich
 
                     result.map(value => client_names.push(value.app_name))
 
-                    app.oauth = new OAuth2Server({
-                        model: MongoOAuth2Model
-                    })
+                    this.#app.oauth = new OAuth2Server({ model: MongoOAuth2Model })
                 }
                 else if ( process.env.db_type === `postgres` )
                 {
@@ -149,23 +152,21 @@ class Spich
 
                     result.map(value => client_names.push(value.app_name))
 
-                    app.oauth = new OAuth2Server( { model: new PGOAuth2Model() })
+                    this.#app.oauth = new OAuth2Server( { model: new PGOAuth2Model() })
                 }
 
                 const { Request, Response } = OAuth2Server
 
+                //todo if socket io is have too many problems may be you need see this.
+                // app.all(`/socket.io`, (req, res) => res.send(``))
 
-                app.all(`/socket.io`, (req, res) => res.send(``))
-
-                app.all(`/oauth/token`,
+                this.#app.post(`/oauth/token`,
                     async (req, res) =>
                     {
                         try
                         {
                             new Logger().access(req, res)
-                            res.send(
-                                await app.oauth.token(new Request(req), new Response(res))
-                            )
+                            res.send(await this.#app.oauth.token(new Request(req), new Response(res)))
                         }
                         catch ( e )
                         {
@@ -174,12 +175,19 @@ class Spich
                     }
                 )
 
-                app.all(`*`,  async (req, res, next) =>
+                this.#app.all(`*`,  async (req, res, next) =>
                 {
-                    if ( await new Bootstrap().is_public_route(req) || await new Bootstrap().is_static_route(req) )
+                    global.request = req
+                    global.response = res
+
+                    this.#config = await new Router().router(req)
+
+                    if ( this.#config.public )
                     {
                         new Logger().access(req, res)
-                        await new Bootstrap().run(req, res)
+                        await new Bootstrap().run(this.#config, res)
+                        global.request = null
+                        global.response = null
                     }
                     else
                     {
@@ -187,15 +195,17 @@ class Spich
                     }
                 })
 
-                app.all(/^(?:(?!\/?.*uploads).*)/,
+                this.#app.all(/^(?:(?!\/?.*uploads).*)/,
                     async (req, res) =>
                     {
                         try
                         {
-                            req.oauth = await app.oauth.authenticate(new Request(req), new Response(res))
+                            req.oauth = await this.#app.oauth.authenticate(new Request(req), new Response(res))
                             new Logger().access(req, res)
 
-                            await new Bootstrap().run(req, res)
+                            await new Bootstrap().run(this.#config, res)
+                            global.request = null
+                            global.response = null
                         }
                         catch ( e )
                         {
@@ -208,7 +218,12 @@ class Spich
             }
             else
             {
-                app.all(`*`,  async (req, res) => await new Bootstrap().run(req, res))
+                this.#app.all(`*`,  async (req, res) =>
+                {
+                    await new Bootstrap().run(this.#config, res)
+                    global.request = null
+                    global.response = null
+                })
             }
         }
         catch ( e )

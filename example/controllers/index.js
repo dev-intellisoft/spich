@@ -60,6 +60,12 @@ class Index extends Controller
             return  e.message
         }
     }
+
+    async public()
+    {
+        //--disable-auth
+        return `You are seeing a public area`
+    }
 }
 
 export default Index

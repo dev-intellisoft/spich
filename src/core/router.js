@@ -142,6 +142,7 @@ class Router
 
             const config =
             {
+                public:_controller[this.#method].toString().includes(`--disable-auth`),
                 _controller,
                 folder:this.#folder,
                 controller:this.#controller,
