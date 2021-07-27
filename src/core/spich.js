@@ -201,6 +201,8 @@ class Spich
                         try
                         {
                             req.oauth = await this.#app.oauth.authenticate(new Request(req), new Response(res))
+                            global.request = req
+                            global.response = res
                             new Logger().access(req, res)
                             this.#config = await new Router().router(req)
 
@@ -221,7 +223,10 @@ class Spich
             {
                 this.#app.all(`*`,  async (req, res) =>
                 {
+                    global.request = req
+                    global.response = res
                     this.#config = await new Router().router(req)
+
                     await new Bootstrap().run(this.#config, res)
                     global.request = null
                     global.response = null
