@@ -1,6 +1,6 @@
 import { Controller } from 'spich'
 
-class Index extends Controller
+class Foo extends Controller
 {
     constructor (props)
     {
@@ -13,15 +13,14 @@ class Index extends Controller
      *      await this.model(`test`) // for ./models/test_model.js
      *      await this.lib(`test`) // for ./libs/test_lib.js
      *      ...
-     * To use them you simpy:
+     * To use them you simply:
      *      this.test_model.<my_model_function> // for the model you loaded
      *      and
      *      this.test_lib.<my_lib_function> // for the lib you loaded
      */
     async _init()
     {
-        await this.model(`test`)
-        await this.lib(`test`)
+        
     }
 
     /**
@@ -34,38 +33,16 @@ class Index extends Controller
      *      return this.view(`index`)
      * PS:
      *      Don't need add *.html when you are calling your html files and all html files
-     *      and all you html files must be in ./views folder
+     *      and all you html files must be in ./views folder.
+     *
+     *      sometime some await will be required.
      */
-    async index()
+    async index(str)
     {
-        return this.view(`index`)
-    }
-
-    async fruits()
-    {
-        return await this.test_model.fruits()
-    }
-
-    async sum()
-    {
-        try
-        {
-            const number = await this.test_lib.sum(10, 20)
-
-            return { number }
-        }
-        catch (e)
-        {
-            console.log(e)
-            return  e.message
-        }
-    }
-
-    async public()
-    {
-        //--disable-auth
-        return `You are seeing a public area`
+        if ( str )
+            return  str
+        return 'foo'
     }
 }
 
-export default Index
+export default Foo
