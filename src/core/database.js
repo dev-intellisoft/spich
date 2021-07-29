@@ -11,17 +11,13 @@ import mongoose from 'mongoose'
 import fs from 'fs'
 import Logger from './logger'
 import Pool from 'pg-pool'
-
-
+import sqlite3 from 'sqlite3'
+import { open } from 'sqlite'
 
 var models = []
 
 class  Database
 {
-    constructor()
-    {
-    }
-
     load = async ( collection ) =>
     {
         try
@@ -185,6 +181,25 @@ class  Database
             else if ( process.env.DB_TYPE === `mysql` )
             {
 
+            }
+            else if ( process.env.DB_TYPE === `sqlite` )
+            {
+                const db = open({
+                    filename:`${APP_PATH}/${process.env.DB_FILE}`,
+                    driver:sqlite3.Database
+                })
+                if (sql.toLowerCase().startsWith(`select`))
+                    return (await db).all(sql)
+                if (sql.toLowerCase().startsWith(`create`))
+                    return (await db).run(sql)
+                if (sql.toLowerCase().startsWith(`insert`))
+                    return (await db).run(sql)
+                if (sql.toLowerCase().startsWith(`update`))
+                    return (await db).run(sql)
+                if (sql.toLowerCase().startsWith(`delete`))
+                    return (await db).run(sql)
+                if (sql.toLowerCase().startsWith(`drop`))
+                    return (await db).run(sql)
             }
             else
             {
