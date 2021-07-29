@@ -22,6 +22,10 @@ class Controller extends Loader
     is_put = () => (request.method === `PUT`)
 
     is_patch = () => (request.method === `PATCH`)
+
+    is_head = () => ( request.method === `HEAD` )
+
+    is_options = () => ( request.method === `OPTIONS` )
 }
 
 export default Controller

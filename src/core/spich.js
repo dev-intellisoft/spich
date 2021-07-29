@@ -160,20 +160,18 @@ class Spich
                 //todo if socket io is have too many problems may be you need see this.
                 // app.all(`/socket.io`, (req, res) => res.send(``))
 
-                this.#app.post(`/oauth/token`,
-                    async (req, res) =>
+                this.#app.post(`/oauth/token`, async (req, res) =>
+                {
+                    try
                     {
-                        try
-                        {
-                            new Logger().access(req, res)
-                            res.send(await this.#app.oauth.token(new Request(req), new Response(res)))
-                        }
-                        catch ( e )
-                        {
-                            res.status(e.status).send(e)
-                        }
+                        new Logger().access(req, res)
+                        res.send(await this.#app.oauth.token(new Request(req), new Response(res)))
                     }
-                )
+                    catch ( e )
+                    {
+                        res.status(e.status).send(e)
+                    }
+                })
 
                 this.#app.all(`*`,  async (req, res, next) =>
                 {

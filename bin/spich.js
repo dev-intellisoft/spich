@@ -1,8 +1,16 @@
 #!/usr/bin/env node
 
-// import glob from 'glob'
+/**
+ * todo make spich create c myfolder/mycontroller work
+ * todo make spich create l myfolder/mymodel work
+ * todo make spich create m myfolder/mylib work
+ *
+ * todo later add "spich create:controller <controller>" command
+ * todo later add "spich create:model <model>" command
+ * todo later add "spich create:library <library>" command
+ */
+
 import fs from 'fs'
-// import cliProgress from 'cli-progress'
 
 const command = process.argv[2] || ``
 
