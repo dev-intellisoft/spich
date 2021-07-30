@@ -1,7 +1,4 @@
-import dotenv from 'dotenv'
 import { Controller } from 'spich'
-
-dotenv.config({ path:`.env.sqlite` })
 
 class Sqlite extends Controller
 {

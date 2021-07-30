@@ -12,7 +12,7 @@ class Sqlite_Model extends Model
 {
     constructor(props)
     {
-        super(props)
+        super(props, `sqlite0`)
     }
 
     async create( table, field )
@@ -20,7 +20,7 @@ class Sqlite_Model extends Model
         try
         {
             const sql = `CREATE TABLE ${table} (${field} VARCHAR(50))`
-            return await this.query(sql)
+            return await this.query( sql )
         }
         catch (e)
         {
@@ -34,7 +34,7 @@ class Sqlite_Model extends Model
         try
         {
             const sql = `INSERT INTO ${table} (${field}) VALUES('${value}')`
-            return await this.query(sql)
+            return await this.query( sql )
         }
         catch (e)
         {
@@ -47,7 +47,8 @@ class Sqlite_Model extends Model
     {
         try
         {
-            return await this.query(`UPDATE ${table} SET ${field} = '${value}'`)
+            const sql = `UPDATE ${table} SET ${field} = '${value}'`
+            return await this.query( sql )
         }
         catch (e)
         {
@@ -60,7 +61,8 @@ class Sqlite_Model extends Model
     {
         try
         {
-            return await this.query(`SELECT ${field} FROM ${table}`)
+            const sql = `SELECT ${field} FROM ${table}`
+            return await this.query( sql )
         }
         catch (e)
         {
@@ -73,7 +75,8 @@ class Sqlite_Model extends Model
     {
         try
         {
-            return await this.query(`DELETE FROM ${table}`)
+            const sql = `DELETE FROM ${table}`
+            return await this.query( sql )
         }
         catch (e)
         {
@@ -86,8 +89,8 @@ class Sqlite_Model extends Model
     {
         try
         {
-            console.log(`DROP TABLE ${table}`)
-            return await this.query(`DROP TABLE ${table}`)
+            const sql = `DROP TABLE ${table}`
+            return await this.query( sql )
         }
         catch (e)
         {
