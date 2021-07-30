@@ -18,6 +18,36 @@ var models = []
 
 class  Database
 {
+    #db_name
+    #db_driver
+    #db_user
+    #db_host
+    #db_password
+    #db_database
+    #db_port
+    #db_filename //if sqlite
+
+    constructor(props = {})
+    {
+        if ( props.driver === `sqlite` )
+        {
+            this.#db_name = props.name
+            this.#db_filename = props.file
+            this.#db_driver = props.driver
+        }
+
+        if ( props.driver === `postgres` )
+        {
+            this.#db_name = props.name
+            this.#db_driver = props.driver
+            this.#db_host = props.host
+            this.#db_user = props.user
+            this.#db_password = props.password
+            this.#db_database = props.database
+            this.#db_port = props.port
+        }
+
+    }
     load = async ( collection ) =>
     {
         try
@@ -46,7 +76,7 @@ class  Database
         }
     }
 
-    select = async ( collection, where={}, one = false ) =>
+    mselect = async ( collection, where={}, one = false ) =>
     {
         try
         {
@@ -63,7 +93,7 @@ class  Database
         }
     }
 
-    select_partial = async ( collection, where, part, one ) =>
+    mselect_partial = async ( collection, where, part, one ) =>
     {
         try
         {
@@ -81,7 +111,7 @@ class  Database
         }
     }
 
-    insert = async ( collection, data ) =>
+    minsert = async ( collection, data ) =>
     {
         try
         {
@@ -96,7 +126,7 @@ class  Database
         }
     }
 
-    update = async ( collection, data, where, many = false ) =>
+    mupdate = async ( collection, data, where, many = false ) =>
     {
         try
         {
@@ -113,7 +143,7 @@ class  Database
         }
     }
 
-    delete = async ( collection, where, many = false ) =>
+    mdelete = async ( collection, where, many = false ) =>
     {
         try
         {
@@ -131,19 +161,19 @@ class  Database
         }
     }
 
-    query = async sql =>
+    query = async ( sql ) =>
     {
         try
         {
-            if ( process.env.DB_TYPE === `postgres` )
+            if ( this.#db_driver === `postgres` )
             {
+                const user = this.#db_user
+                const password = this.#db_password
+                const host = this.#db_host
+                const database = this.#db_database
+
                 return new Promise(function (resolve, reject)
                 {
-                    const user = `${process.env.DB_USER || process.env.USER}`
-                    const password = `${process.env.DB_PASS || ''}`
-                    const host = `${process.env.DB_HOST || 'localhost'}`
-                    const database = `${process.env.DB_BASE || ''}`
-
                     const config = { user, password, host, database, max:10, idleTimeoutMillis: 1000 }
 
                     const pool = new Pool(config)
@@ -178,14 +208,14 @@ class  Database
                     })
                 })
             }
-            else if ( process.env.DB_TYPE === `mysql` )
+            else if ( this.#db_driver === `mysql` )
             {
 
             }
-            else if ( process.env.DB_TYPE === `sqlite` )
+            else if ( this.#db_driver === `sqlite` )
             {
                 const db = open({
-                    filename:`${APP_PATH}/${process.env.DB_FILE}`,
+                    filename:`${APP_PATH}/${this.#db_filename}`,
                     driver:sqlite3.Database
                 })
                 if (sql.toLowerCase().startsWith(`select`))
@@ -203,7 +233,6 @@ class  Database
             }
             else
             {
-                console.log(`To you use some database you need to set up it's configuration on you ".env" file`)
                 return { code: `ERR`, message:`Database configuration error!` }
             }
         }
