@@ -15,9 +15,10 @@ class Loader
     {
         try
         {
+            const { config:{ databases } } = await import(`${APP_PATH}/config`)
             let _model = await import(`${MOD_PATH}/${model_name}_model`)
             if ( _model.default ) _model = _model.default
-            this[`${model_name}_model`] = new _model()
+            this[`${model_name}_model`] = new _model(databases)
         }
         catch ( e )
         {
