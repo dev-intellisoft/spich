@@ -7,16 +7,10 @@ import  Database from './database'
 
 class Model extends Database
 {
-    constructor()
+    constructor(props, name)
     {
-        super()
-        if ( process.env.DB_TYPE === `postgres` || process.env.DB_TYPE === `sqlite` || process.env.DB_TYPE === `mysql` )
-        {
-            delete this.select
-            delete this.insert
-            delete this.update
-            delete this.delete
-        }
+        const [ config ] = props.filter((db) => db.name === name)
+        super(config)
     }
 }
 

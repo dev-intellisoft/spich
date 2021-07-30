@@ -8,9 +8,9 @@ class MongoOAuth2Model
     {
         try
         {
-            const token = await new Database().select( `access_tokens`, { access_token }, true )
-            const client = await new Database().select( `applications`, { _id:token.app_name }, true )
-            const user = await new Database().select( `users`, { _id:token.user_id } )
+            const token = await new Database().mselect( `access_tokens`, { access_token }, true )
+            const client = await new Database().mselect( `applications`, { _id:token.app_name }, true )
+            const user = await new Database().mselect( `users`, { _id:token.user_id } )
 
             return {
                 accessToken: token.access_token,
@@ -30,7 +30,7 @@ class MongoOAuth2Model
 
     saveToken = async (token, client, user) =>
     {
-        const access_token = await new Database().insert( `access_tokens`, {
+        const access_token = await new Database().minsert( `access_tokens`, {
             access_token: token.accessToken,
             expires: token.accessTokenExpiresAt,
             // scope: token.scope,
@@ -38,7 +38,7 @@ class MongoOAuth2Model
             user_id: user.id
         })
 
-        const refesh_token = await new Database().insert( `refresh_tokens`, {
+        const refesh_token = await new Database().minsert( `refresh_tokens`, {
             refresh_token: token.refreshToken,
             expires: token.refreshTokenExpiresAt,
             // scope: token.scope,
@@ -65,7 +65,7 @@ class MongoOAuth2Model
     {
         try
         {
-            const user = await new Database().select( `users`, { email }, true )
+            const user = await new Database().mselect( `users`, { email }, true )
             if( await bcrypt.compare(password, user.password) )
                 return user
             return { code:1, message:`Invalid username and/or password! ` }
@@ -81,7 +81,7 @@ class MongoOAuth2Model
     {
         try
         {
-            const client = await new Database().select(`applications`, { app_name, app_secret }, true)
+            const client = await new Database().mselect(`applications`, { app_name, app_secret }, true)
 
             return {
                 id: client.id,
@@ -98,9 +98,9 @@ class MongoOAuth2Model
 
     getRefreshToken = async( refresh_token ) =>
     {
-        const refresh = await new Database().select( `refresh_tokens`, { refresh_token }, true )
-        const user = await new Database().select( `users`, { "_id":refresh.user_id }, true )
-        const client = await new Database().select( `applications`, { "_id":refresh.app_name }, true )
+        const refresh = await new Database().mselect( `refresh_tokens`, { refresh_token }, true )
+        const user = await new Database().mselect( `users`, { "_id":refresh.user_id }, true )
+        const client = await new Database().mselect( `applications`, { "_id":refresh.app_name }, true )
 
         return {
             refreshToken: refresh.refresh_token,
@@ -121,7 +121,7 @@ class MongoOAuth2Model
     {
         try
         {
-            return await new Database().select(`applications`)
+            return await new Database().mselect(`applications`)
         }
         catch ( e )
         {
