@@ -13,6 +13,15 @@ export const config = {
             password:`test`,
             database:`test`,
             port:5432
+        },
+        {
+            name: `mysql0`,
+            driver:`mysql`,
+            host:`localhost`,
+            user:`test`,
+            password:`test`,
+            database:`test`,
+            port:3306
         }
     ]
 }

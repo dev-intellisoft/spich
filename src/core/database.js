@@ -13,6 +13,7 @@ import Logger from './logger'
 import Pool from 'pg-pool'
 import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
+import mysql from 'mysql2'
 
 var models = []
 
@@ -37,6 +38,17 @@ class  Database
         }
 
         if ( props.driver === `postgres` )
+        {
+            this.#db_name = props.name
+            this.#db_driver = props.driver
+            this.#db_host = props.host
+            this.#db_user = props.user
+            this.#db_password = props.password
+            this.#db_database = props.database
+            this.#db_port = props.port
+        }
+
+        if ( props.driver === `mysql` )
         {
             this.#db_name = props.name
             this.#db_driver = props.driver
@@ -210,7 +222,25 @@ class  Database
             }
             else if ( this.#db_driver === `mysql` )
             {
+                return new Promise( (resolve, reject) =>
+                {
+                    let res
+                    const connection = mysql.createConnection(
+                    {
+                        host: this.#db_host,
+                        user: this.#db_user,
+                        password: this.#db_password,
+                        database: this.#db_database
+                    })
+                    connection.connect()
 
+                    connection.query(sql, (error, results, fields) =>
+                    {
+                        if (error) throw error
+                        resolve(results) && connection.end()
+                    })
+
+                })
             }
             else if ( this.#db_driver === `sqlite` )
             {
