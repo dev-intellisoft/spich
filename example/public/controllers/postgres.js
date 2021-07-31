@@ -1,4 +1,3 @@
-import dotenv from 'dotenv'
 import { Controller } from 'spich'
 
 class Postgre extends Controller
@@ -15,7 +14,6 @@ class Postgre extends Controller
 
     async index( table, field )
     {
-        dotenv.config({ path:`.env.postgres` })
         try
         {
             if ( this.is_patch() )
