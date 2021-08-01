@@ -13,15 +13,12 @@ import https from 'spdy'
 import http from 'http'
 import OAuth2Server from 'oauth2-server'
 import PGOAuth2Model from './oauth/oauth-pg'
-import MongoOAuth2Model from './oauth/oauth-mongo'
 import structure from './oauth/structure'
 import socketio from 'socket.io'
 import Logger from './logger'
 import fileUpload from 'express-fileupload'
 import pack from '../../package.json'
-
-import mongoose from 'mongoose'
-import Router from "./router";
+import Router from './router'
 
 class Spich
 {
@@ -42,17 +39,6 @@ class Spich
 
         try
         {
-
-            if ( process.env.DB_TYPE === `mongo` )
-            {
-                mongoose.set(`useCreateIndex`, true)
-                mongoose.connect(process.env.MONGO_URI, {
-                    useUnifiedTopology: true,
-                    useNewUrlParser: true,
-                    useFindAndModify:false
-                })
-            }
-
             this.#app.use(helmet())
             this.#app.disable(`x-powered-by`)
             this.#app.set(`trust_proxy`, true);
@@ -134,19 +120,9 @@ class Spich
 
             if ( process.env.ENABLE_OAUTH === `true` )
             {
-                await new structure().init()
-
                 global.client_names = []
 
-                if ( process.env.DB_TYPE === `mongo` )
-                {
-                    const result = await MongoOAuth2Model.load_applications()
-
-                    result.map(value => client_names.push(value.app_name))
-
-                    this.#app.oauth = new OAuth2Server({ model: MongoOAuth2Model })
-                }
-                else if ( process.env.DB_TYPE === `postgres` )
+                if ( process.env.DB_TYPE === `postgres` )
                 {
                     const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.DB_SCHEMA || `public`}.applications`)
 

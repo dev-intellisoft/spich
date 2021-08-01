@@ -7,7 +7,6 @@
  *
  */
 
-import mongoose from 'mongoose'
 import fs from 'fs'
 import Logger from './logger'
 import Pool from 'pg-pool'
@@ -59,118 +58,6 @@ class  Database
             this.#db_port = props.port
         }
 
-    }
-    load = async ( collection ) =>
-    {
-        try
-        {
-            if ( models[`${collection}`] !== undefined )
-                return models[`${collection}`]
-
-            if ( fs.existsSync(`${APP_PATH}/models/schemas/${collection}.js`) )
-            {
-                const s = await import(`${APP_PATH}/models/schemas/${collection}.js`)
-                const schema = new mongoose.Schema(s.schema())
-                models[`${collection}`] = mongoose.model(collection, schema)
-                return models[`${collection}`]
-            }
-            else if ( fs.existsSync(`${process.env.PWD}/node_modules/spich/src/core/models/schemas/${collection}.js`) )
-            {
-                const s = await import(`./models/schemas/${collection}.js`)
-                const schema = new mongoose.Schema(s.schema())
-                models[`${collection}`] = mongoose.model(collection, schema)
-                return models[`${collection}`]
-            }
-        }
-        catch ( e )
-        {
-            new Logger().error(e)
-        }
-    }
-
-    mselect = async ( collection, where={}, one = false ) =>
-    {
-        try
-        {
-            const model = await this.load(collection)
-
-            if (one)
-                return await model.findOne(where)
-            return await model.find(where)
-        }
-        catch (e)
-        {
-            new Logger().error(e)
-            return e
-        }
-    }
-
-    mselect_partial = async ( collection, where, part, one ) =>
-    {
-        try
-        {
-            const model = await this.load(collection)
-
-            if ( one )
-                return await model.findOne(where, part)
-
-            return await model.find(where, part)
-        }
-        catch ( e )
-        {
-            new Logger().error(e)
-            return e
-        }
-    }
-
-    minsert = async ( collection, data ) =>
-    {
-        try
-        {
-            const model = await this.load(collection)
-            collection = new model(data)
-            return await collection.save()
-        }
-        catch (e)
-        {
-            new Logger().error(e)
-            return e
-        }
-    }
-
-    mupdate = async ( collection, data, where, many = false ) =>
-    {
-        try
-        {
-            const model = await this.load(collection)
-            if( many )
-                return await model.updateMany(where, data)
-            await model.findOneAndUpdate(where, data)
-            return await model.find(where)
-        }
-        catch (e)
-        {
-            new Logger().error(e)
-            return e
-        }
-    }
-
-    mdelete = async ( collection, where, many = false ) =>
-    {
-        try
-        {
-            const model = await this.load(collection)
-
-            if ( many )
-                return await model.deleteMany(where)
-
-            return await model.findOneAndRemove(where)
-        }
-        catch (e)
-        {
-            new Logger().error(e)
-            return e
-        }
     }
 
     query = async ( sql ) =>
