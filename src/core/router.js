@@ -18,69 +18,19 @@ class Router
     #application_permission = false
     #client_id = ``
 
-    static_routes = async () =>
-    {
-        try
-        {
-            if (fs.existsSync(`${APP_PATH}/.conf/routes.json`))
-            {
-                routes = await import(`${APP_PATH}/.conf/routes.json`)
-
-                if ( routes.default !== undefined )
-                    routes = routes.default
-            }
-        }
-        catch (e)
-        {
-            new Logger().error(e)
-        }
-    }
-
-    is_public = async req =>
-    {
-        try
-        {
-            await this.static_routes()
-            let route_to = req.path
-
-            for (let key in routes)
-                if( req.path.startsWith(key) )
-                    route_to = routes[key]
-            let regex = new RegExp(`{\\*}`)
-
-            return regex.test(route_to)
-        }
-        catch ( e )
-        {
-            new Logger().error(e)
-        }
-    }
-
-    is_static = req => ( req.path === `/favicon.ico` )
-
     router = async ( req ) =>
     {
         try
         {
             let counter = 0
 
-            await this.static_routes()
-
             let route_to = req.path
 
-            // check if the path have some route set in router.json
-            for (let key in routes)  if(req.path.startsWith(key)) route_to = routes[key]
+            let permitted_applications = `*`
 
-            // check if some have some pre-assigned application set in the router.json
-            let permitted_applications = route_to.substring(route_to.lastIndexOf(`{`)+1,route_to.lastIndexOf(`}`)).replace(/\s/g,`}`).split(`,`)
+            route_to = route_to.split(`/`)
 
-            route_to = route_to.replace(/\{.*\}/, ``) // remove the pre-assignment declaration from the variable to avoid fake route
-
-
-            // removing parameters declaration from route to avoid confusing in routing process
-            route_to = route_to.replace(/\/\:.*\?/, ``).split(`/`)
-
-            // #routing process
+            // looking for controllers inside a folder
             route_to.map( ( r, index ) =>
             {
                 if ( r !== `` &&  fs.existsSync(`${CTL_PATH}${this.#folder}${r}`) )
@@ -110,7 +60,7 @@ class Router
 
             if ( ctl.default ) ctl = ctl.default
 
-            const _controller = new ctl
+            const _controller = await new ctl
 
             if( route_to[ counter ] && typeof _controller[route_to[counter]] === `function` )
             {
