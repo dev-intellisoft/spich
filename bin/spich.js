@@ -72,47 +72,44 @@ const create = () =>
     let [,,, params, name] = process.argv
 
     if ( !name )
+        return show_help()
+
+
+    name = name.toLowerCase().trim().charAt(0).toUpperCase() + name.slice(1)
+    let loaders = ``
+    if ( params.includes(`m`) )
     {
-        show_help()
+        let model = fs.readFileSync(`${source_path}/models/index.js`).toString()
+        model = model.replace(/{{model}}/g, `${name}_Model`)
+        if ( !fs.existsSync(`models/${name.toLowerCase()}_model.js`) )
+            fs.writeFileSync(`models/${name.toLowerCase()}_model.js`, model)
+        loaders = `${loaders} await this.model(\`${name}\`)\n`
     }
-    else
+
+    if ( params.includes(`l`) )
     {
-        name = name.toLowerCase().trim().charAt(0).toUpperCase() + name.slice(1)
-        let loaders = ``
-        if ( params.includes(`m`) )
-        {
-            let model = fs.readFileSync(`${source_path}/models/index.js`).toString()
-            model = model.replace(/{{model}}/g, `${name}_Model`)
-            if ( !fs.existsSync(`models/${name.toLowerCase()}_model.js`) )
-                fs.writeFileSync(`models/${name.toLowerCase()}_model.js`, model)
-            loaders = `${loaders} await this.model(\`${name}\`)\n`
-        }
+        let lib = fs.readFileSync(`${source_path}/libs/index.js`).toString()
+        lib = lib.replace(/{{lib}}/g, `${name}_Lib`)
+        if ( !fs.existsSync(`libs/${name.toLowerCase()}_lib.js`) )
+            fs.writeFileSync(`libs/${name.toLowerCase()}_lib.js`, lib)
+        loaders = `${loaders} await this.lib(\`${name}\`)\n`
+    }
 
-        if ( params.includes(`l`) )
-        {
-            let lib = fs.readFileSync(`${source_path}/libs/index.js`).toString()
-            lib = lib.replace(/{{lib}}/g, `${name}_Lib`)
-            if ( !fs.existsSync(`libs/${name.toLowerCase()}_lib.js`) )
-                fs.writeFileSync(`libs/${name.toLowerCase()}_lib.js`, lib)
-            loaders = `${loaders} await this.lib(\`${name}\`)\n`
-        }
+    if ( params.includes(`v`) )
+    {
+        const view = fs.readFileSync(`${source_path}/views/index.html`).toString()
+        if ( !fs.existsSync(`views/${name.toLowerCase()}.html`) )
+            fs.writeFileSync(`views/${name.toLowerCase()}.html`, view)
+    }
 
-        if ( params.includes(`v`) )
-        {
-            const view = fs.readFileSync(`${source_path}/views/index.html`).toString()
-            if ( !fs.existsSync(`views/${name.toLowerCase()}.html`) )
-                fs.writeFileSync(`views/${name.toLowerCase()}.html`, view)
-        }
-
-        if ( params.includes(`c`) )
-        {
-            let controller = fs.readFileSync(`${source_path}/controllers/index.js`).toString()
-            controller = controller.replace(/{{controller}}/g, name)
-            controller = controller.replace(/{{view}}/g, name.toLowerCase())
-            controller = controller.replace(/{{loaders}}/g, loaders)
-            if ( !fs.existsSync(`controllers/${name.toLowerCase()}.js`) )
-                fs.writeFileSync(`controllers/${name.toLowerCase()}.js`,  controller)
-        }
+    if ( params.includes(`c`) )
+    {
+        let controller = fs.readFileSync(`${source_path}/controllers/index.js`).toString()
+        controller = controller.replace(/{{controller}}/g, name)
+        controller = controller.replace(/{{view}}/g, name.toLowerCase())
+        controller = controller.replace(/{{loaders}}/g, loaders)
+        if ( !fs.existsSync(`controllers/${name.toLowerCase()}.js`) )
+            fs.writeFileSync(`controllers/${name.toLowerCase()}.js`,  controller)
     }
 }
 
