@@ -12,6 +12,14 @@ class PGOAuth2Model
     {
         try
         {
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            {
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const model = new pg_model.default
+                if ( typeof model.getClient === `function`)
+                    return await model.getClient ( client_id, client_secret, callback )
+            }
+
             const sql = `
                 SELECT 
                     app_id, app_name, app_secret, redirect_uri
@@ -38,6 +46,14 @@ class PGOAuth2Model
     {
         try
         {
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            {
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const model = new pg_model.default
+                if ( typeof model.grantTypeAllowed === `function`)
+                    return await model.grantTypeAllowed ( client_id, grant_type, callback )
+            }
+
             if ( grant_type === `password` || grant_type === `refresh_token` )
                 return callback(false, client_names.indexOf(client_id.toLowerCase()) >= 0)
             callback(false, true);
@@ -52,6 +68,14 @@ class PGOAuth2Model
     {
         try
         {
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            {
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const model = new pg_model.default
+                if ( typeof model.getUser === `function`)
+                    return await model.getUser ( username, password, callback )
+            }
+
             const sql = `
                 SELECT 
                     user_id 
@@ -74,10 +98,18 @@ class PGOAuth2Model
         }
     }
 
-    saveRefreshToken = async ( refresh_token, client_id, expires, user_id, callback) =>
+    saveRefreshToken = async ( refresh_token, client_id, expires, user_id, callback ) =>
     {
         try
         {
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            {
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const model = new pg_model.default
+                if ( typeof model.saveRefreshToken === `function`)
+                    return await model.saveRefreshToken ( refresh_token, client_id, expires, user_id, callback )
+            }
+
             const timezone = process.env.TIMEZONE || 'GMT'
             if(user_id.id) user_id = user_id.id
             expires = expires.toString().replace(/GMT.*$/,  timezone)
@@ -108,6 +140,14 @@ class PGOAuth2Model
     {
         try
         {
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            {
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const model = new pg_model.default
+                if ( typeof model.saveAccessToken === `function`)
+                    return await model.saveAccessToken ( access_token, client_id, expires, user_id, callback )
+            }
+
             const timezone = process.env.TIMEZONE || 'GMT'
             if(user_id.id) user_id = user_id.id
             expires = expires.toString().replace(/GMT.*$/, timezone)
@@ -141,9 +181,7 @@ class PGOAuth2Model
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
             {
                 const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
-
                 const model = new pg_model.default
-
                 if ( typeof model.getAccessToken === `function`)
                     return await model.getAccessToken ( bearer_token )
             }
@@ -160,26 +198,26 @@ class PGOAuth2Model
                 WHERE 
                     access_token = '${bearer_token}'
             `
-            const result = await new Database().query(sql)
+            const [ result ] = await new Database().query(sql)
 
-            if (!result[0])
+            if (result)
             {
-                return `erro`
+                return {
+                    accessToken: result.access_token,
+                    clientId: result.app_id,
+                    expires: result.expires,
+                    accessTokenExpiresAt:result.expires,
+                    user_id: result.user_id,
+                    app_id: result.app_id,
+                    app_name: result.app_name,
+                    user: {
+                        user_id:result.user_id
+                    }
+                }
             }
             else
             {
-                return {
-                    accessToken: result[0].access_token,
-                    clientId: result[0].app_id,
-                    expires: result[0].expires,
-                    accessTokenExpiresAt:result[0].expires,
-                    user_id: result[0].user_id,
-                    app_id: result[0].app_id,
-                    app_name: result[0].app_name,
-                    user: {
-                        user_id:result[0].user_id
-                    }
-                }
+                return `error`
             }
         }
         catch ( e )
@@ -197,9 +235,7 @@ class PGOAuth2Model
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
             {
                 const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
-
                 const model = new pg_model.default
-
                 if ( typeof model.getRefreshToken === `function`)
                     return await model.getRefreshToken ( bearer_token )
             }
@@ -257,16 +293,30 @@ class PGOAuth2Model
 
     revokeToken = async() =>
     {
-        console.log ( 8 )
+        if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+        {
+            const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+            const model = new pg_model.default
+            if ( typeof model.revokeToken === `function`)
+                return await model.revokeToken ()
+        }
+
         //this function should remove the token from database but to keep track action I won't do that
         return true
     }
     
-    saveToken = async (token, { app_id, app_name }, user_id ) =>
+    saveToken = async ( token, { app_id, app_name }, user_id ) =>
     {
-        console.log ( 9 )
         try
         {
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            {
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const model = new pg_model.default
+                if ( typeof model.saveToken === `function`)
+                    return await model.saveToken ( token, { app_id, app_name }, user_id )
+            }
+
             const at_expires = new Date(token.accessTokenExpiresAt).toUTCString()
 
                 console.log(`
@@ -312,7 +362,7 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            return `erro`
+            return `error`
         }
     }
 }
