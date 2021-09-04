@@ -39,7 +39,7 @@ class Test extends Controller
      *      sometime some await will be required.
      */
     async index( type, param )
-    {
+    {//--disable-auth
         if ( type === `models` )
             return await this.test_model.test(param)
         if ( type === `libs` )
@@ -51,7 +51,7 @@ class Test extends Controller
     }
 
     async methods ()
-    {
+    {//--disable-auth
         /**
          * testing http methods
          */
@@ -68,7 +68,7 @@ class Test extends Controller
     }
 
     async returns(param)
-    {
+    {//--disable-auth
         if ( this.is_post() )
             return this.input.post(param)
         if ( this.is_put() )

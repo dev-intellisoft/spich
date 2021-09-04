@@ -125,7 +125,7 @@ const enable = async () =>
         return show_help()
 
     const { config } = await import(`../example/public/config.js`)
-    if ( config.authentication.enable )
+    if ( config.authentication !== undefined )
     {
         const [ database ] = config.databases.filter(({ name }) => db_name === name)
         if ( !database )

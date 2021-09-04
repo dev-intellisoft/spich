@@ -38,7 +38,7 @@ class Index extends Controller
      *      sometime some await will be required.
      */
     async index(str)
-    {
+    {//--disable-auth
         if ( str )
             return str
         return `OK`
