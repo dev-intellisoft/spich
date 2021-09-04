@@ -130,14 +130,14 @@ class Spich
 
                 if ( database.driver === `postgres` )
                 {
-                    const PGOAuth2Model = await import('./oauth/oauth-pg')
+                    const PGOAuth2Model = (await import('./oauth/oauth-pg')).default
                     const result = await new Database(database).query(`SELECT LOWER(app_name) app_name FROM applications`)
                     result.map(value => client_names.push(value.app_name))
                     this.#app.oauth = new OAuth2Server( { model: new PGOAuth2Model() })
                 }
                 else if ( database.driver === `sqlite` )
                 {
-                    const SQLITEOAuth2Model = await import('./oauth/oauth-sqlite')
+                    const SQLITEOAuth2Model = (await import('./oauth/oauth-sqlite')).default
                     const result = await new Database(database).query(`SELECT LOWER(app_name) app_name FROM applications`)
                     result.map(value => client_names.push(value.app_name))
                     this.#app.oauth = new OAuth2Server( { model: new SQLITEOAuth2Model() })
