@@ -12,12 +12,39 @@ class Users_Model extends Model
 {
     constructor(props)
     {
-        super(props)
+        super(props, `sqlite0`)
     }
 
-    async create(data)
+    async create({ email, username, password })
     {
-        return await this.query("YOUR SQL QUERY")
+        try
+        {
+            const sql = `
+                INSERT INTO users(email, username, password)
+                VALUES ('${email}', '${username}', '${password}')
+            `
+            return await this.query(sql)
+        }
+        catch (e)
+        {
+            return e
+        }
+    }
+
+    async clean()
+    {
+        try
+        {
+            const sql = `
+                DELETE FROM users
+            `
+            return await this.query(sql)
+        }
+        catch (e)
+        {
+            console.log(`~~~~~~~~~~>`, e)
+            return  e
+        }
     }
 }
 

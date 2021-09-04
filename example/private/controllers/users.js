@@ -39,16 +39,10 @@ class Users extends Controller
      */
     async index()
     {//--disable-auth
-        return `test`
-    }
-
-    async create()
-    {//--disable-auth
-        return `test`
-        // if ( this.is_post() )
-        // {
-        //     return await this.users_model.create();
-        // }
+        if ( this.is_post() )
+            return await this.users_model.create(this.input.post())
+        else if ( this.is_delete() )
+            return await this.users_model.clean()
     }
 }
 

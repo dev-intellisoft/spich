@@ -1,17 +1,22 @@
 import * as assert from "assert";
 import axios from 'axios'
-axios.defaults.baseURL = `http://localhost:8080`
-axios.defaults.headers.common['Content-Type'] = 'application/json'
 
 
 describe('SQLITE OAUTH2', async () =>
 {
+    before(async () =>
+    {
+        axios.defaults.baseURL = `http://localhost:8080`
+        axios.defaults.headers.common['Content-Type'] = 'application/json'
+
+        await axios.delete(`/users`)
+    })
+
     it (`should not be able to access private area`, async () =>
     {
         try
         {
-            const { data } = await axios.get(`/`)
-            console.log(data)
+            await axios.get(`/`)
         }
         catch (e)
         {
@@ -19,12 +24,24 @@ describe('SQLITE OAUTH2', async () =>
         }
     })
 
-    // it (`should create a user`, async () =>
-    // {
-    //     const { data } = await axios.post(`/users/create`, {
-    //         username:`José`,
-    //     })
-    //
-    //     console.log(data)
-    // })
+    it (`should create a user`, async () =>
+    {
+        const { data } = await axios.post(`/users`, {
+            username:`José`,
+            email:`jose@test.com`,
+            password:`12345678`
+        })
+
+        assert.equal(data.changes, 1)
+    })
+
+    it(`should not be able to create duplicate user`, async () =>
+    {
+        const { data } = await axios.post(`/users`, {
+            username:`José`,
+            email:`jose@test.com`,
+            password:`12345678`
+        })
+        assert.equal(data.code, `SQLITE_CONSTRAINT`)
+    })
 })
