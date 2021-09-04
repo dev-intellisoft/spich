@@ -113,7 +113,7 @@ class Database
                 CREATE TABLE IF NOT EXISTS applications
                 (
                     app_id       INTEGER NOT NULL PRIMARY KEY,
-                    app_name     VARCHAR (50) not null unique,
+                    app_name     VARCHAR (50) NOT NULL UNIQUE ,
                     app_secret   VARCHAR (255) NOT NULL,
                     redirect_uri VARCHAR (255),
                     description  VARCHAR (255)
@@ -135,8 +135,8 @@ class Database
                 CREATE TABLE IF NOT EXISTS users
                 (
                     user_id INTEGER NOT NULL PRIMARY KEY,
-                    email VARCHAR (255) NOT NULL,
-                    username VARCHAR (255) NOT NULL,
+                    email VARCHAR (255) NOT NULL UNIQUE,
+                    username VARCHAR (255) NOT NULL UNIQUE,
                     password VARCHAR (255) NOT NULL
                 )
             `
