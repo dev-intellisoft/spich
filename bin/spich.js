@@ -128,7 +128,7 @@ const enable = async () =>
     if ( mod !== `auth` || db !== `--db` )
         return show_help()
 
-    const { config } = await import(`../example/public/config.js`)
+    const { config } = await import(`${process.env.PWD}/config.js`)
     if ( config.authentication !== undefined )
     {
         const [ database ] = config.databases.filter(({ name }) => db_name === name)
