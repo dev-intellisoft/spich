@@ -23,9 +23,5 @@ export const config = {
             database:`test`,
             port:3306
         }
-    ],
-    server_port:80,
-    authentication: {
-        database:`sqlite0`,
-    }
+    ]
 }

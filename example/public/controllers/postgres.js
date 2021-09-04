@@ -13,7 +13,7 @@ class Postgre extends Controller
     }
 
     async index( table, field )
-    {//--disable-auth
+    {
         try
         {
             if ( this.is_patch() )

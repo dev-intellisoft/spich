@@ -68,7 +68,8 @@ const init = () =>
     if ( !fs.existsSync(`views/index.html`) )
         fs.writeFileSync(`views/index.html`, view)
 
-    fs.writeFileSync(`config.js`, config)
+    if ( !fs.existsSync(`config.js`) )
+        fs.writeFileSync(`config.js`, config)
 }
 
 const create = () =>
