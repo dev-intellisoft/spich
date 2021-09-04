@@ -33,7 +33,7 @@ class Logger
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
 
-        fs.open(`${LOG_PATH}/query_${moment().format('YYYY-MM-DD')}.log`, 'a', 666, ( e, id ) =>
+        fs.open(`${LOG_PATH}/query_${moment().format('YYYY-MM-DD')}.log`, 'a', 666, ( e, id= 0 ) =>
             fs.write( id, `${data}\n`, null, 'utf8', () =>
                 fs.close(id, () => {}) ))
     }
@@ -45,7 +45,7 @@ class Logger
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
 
-        fs.open(`${LOG_PATH}/error_${moment().format('YYYY-MM-DD')}.log`, 'a', 666, ( e, id ) =>
+        fs.open(`${LOG_PATH}/error_${moment().format('YYYY-MM-DD')}.log`, 'a', 666, ( e, id= 0 ) =>
             fs.write( id, `${data}\n`, null, 'utf8', () =>
                 fs.close(id, () => {})))
     }
