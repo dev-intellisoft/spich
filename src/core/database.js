@@ -128,23 +128,29 @@ class  Database
             }
             else if ( this.#db_driver === `sqlite` )
             {
-                const db = open({
-                    filename:`${APP_PATH}/${this.#db_filename}`,
-                    driver:sqlite3.Database
-                })
-                if (sql.trim().toLowerCase().startsWith(`select`))
-                    return (await db).all(sql)
-                if (sql.trim().toLowerCase().startsWith(`create`))
-                    return (await db).run(sql)
-                if (sql.trim().toLowerCase().startsWith(`insert`))
-                    return (await db).run(sql)
-                if (sql.trim().toLowerCase().startsWith(`update`))
-                    return (await db).run(sql)
-                if (sql.trim().toLowerCase().startsWith(`delete`))
-                    return (await db).run(sql)
-                if (sql.trim().toLowerCase().startsWith(`drop`))
-                    return (await db).run(sql)
-
+                try
+                {
+                    const db = open({
+                        filename:`${APP_PATH}/${this.#db_filename}`,
+                        driver:sqlite3.Database
+                    })
+                    if (sql.trim().toLowerCase().startsWith(`select`))
+                        return (await db).all(sql)
+                    if (sql.trim().toLowerCase().startsWith(`create`))
+                        return (await db).run(sql)
+                    if (sql.trim().toLowerCase().startsWith(`insert`))
+                        return (await db).run(sql)
+                    if (sql.trim().toLowerCase().startsWith(`update`))
+                        return (await db).run(sql)
+                    if (sql.trim().toLowerCase().startsWith(`delete`))
+                        return (await db).run(sql)
+                    if (sql.trim().toLowerCase().startsWith(`drop`))
+                        return (await db).run(sql)
+                }
+                catch (e)
+                {
+                    return  e
+                }
             }
             else
             {
