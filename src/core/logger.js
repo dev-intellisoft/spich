@@ -6,7 +6,6 @@
 import accesslog from 'access-log'
 import fs from 'fs'
 import moment from 'moment'
-const debug = process.env.DEBUG || 0
 
 class Logger
 {
@@ -19,17 +18,9 @@ class Logger
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
 
-        accesslog(req, res, log_format, data =>
+        accesslog(req, res, log_format, async data =>
         {
-            if(debug > 0 || debug === `access`)
-            {
-                console.log(``)
-                console.log(`################ Access Log ################`)
-                console.log(data)
-                console.log(``)
-            }
-
-            fs.open(`${LOG_PATH}/access_${moment().format('YYYY-MM-DD')}.log`, `a`, 666, ( e, id ) =>
+            fs.open(`${LOG_PATH}/access_${moment().format('YYYY-MM-DD')}.log`, `a`, 666, ( e, id = 0 ) =>
                 fs.write( id, `${data}\n`, null, `utf8`, () =>
                     fs.close(id, () => {})))
         })
@@ -38,14 +29,6 @@ class Logger
     log_query = ( sql ) =>
     {
         const data = `[${new Date()}; SPICH_VERSION=${SPICH_VERSION}; PROJECT_VESION=${PROJECT_VERSION}] ${sql}`
-
-        if( debug > 0 || debug === `sql` )
-        {
-            console.log(``)
-            console.log(`################ SQL Log ################`)
-            console.log(data)
-            console.log(``)
-        }
 
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
@@ -58,14 +41,6 @@ class Logger
     error = ( error ) =>
     {
         const data = `[${new Date()}] ${error.stack || error }`
-
-        if( debug > 0 || debug === `error` )
-        {
-            console.log(``)
-            console.log(`################ Error Log ################`)
-            console.log(data)
-            console.log('')
-        }
 
         if ( !fs.existsSync(`${LOG_PATH}`) )
             fs.mkdirSync(`${LOG_PATH}`)
