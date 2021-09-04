@@ -14,8 +14,6 @@ import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
 import mysql from 'mysql2'
 
-var models = []
-
 class  Database
 {
     #db_name
@@ -112,8 +110,7 @@ class  Database
                 return new Promise( (resolve, reject) =>
                 {
                     let res
-                    const connection = mysql.createConnection(
-                    {
+                    const connection = mysql.createConnection({
                         host: this.#db_host,
                         user: this.#db_user,
                         password: this.#db_password,

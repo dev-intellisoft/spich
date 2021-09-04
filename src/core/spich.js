@@ -12,7 +12,6 @@ import bodyParser from 'body-parser'
 import https from 'spdy'
 import http from 'http'
 import OAuth2Server from 'oauth2-server'
-import PGOAuth2Model from './oauth/oauth-pg'
 import socketio from 'socket.io'
 import Logger from './logger'
 import fileUpload from 'express-fileupload'
@@ -21,11 +20,12 @@ import Router from './router'
 
 class Spich
 {
-    #config
+    #setting
     #app = express()
     #project
     #server
     #port = 80
+    #config
     async run()
     {
         global.CTL_PATH = `${APP_PATH}/controllers`
@@ -49,6 +49,9 @@ class Spich
             this.#app.use('/uploads', express.static(UPLOADS_PATH))
 
             this.#project = await import(`${APP_PATH}/package.json`)
+            const { config } = await import(`${APP_PATH}/config`)
+            this.#config = config
+
             if ( this.#project.default )
                 this.#project = this.#project.default
 
@@ -60,18 +63,18 @@ class Spich
 
             global.connections = 0
 
-            if ( process.env.SSL === `true` )
+            if ( this.#config.ssl !== undefined )
             {
-                 this.#port = process.env.SERVER_PORT || 443
+                this.#port = this.#config.server_port || 443
 
                 const credentials =
                 {
-                    key: fs.readFileSync(process.env.SSL_KEY, process.env.SSL_CHARSET),
-                    cert: fs.readFileSync(process.env.SSL_CERT, process.env.SSL_CHARSET),
-                    passphrase: process.env.SSL_PASS
+                    key: fs.readFileSync(this.#config.ssl.ssl_key, this.#config.ssl.ssl_charset),
+                    cert: fs.readFileSync(this.#config.ssl.ssl_cert, this.#config.ssl.ssl_charset),
+                    passphrase: this.#config.ssl.ssl_pass
                 }
 
-                 this.#server = https.createServer(credentials, this.#app) //added
+                this.#server = https.createServer(credentials, this.#app) //added
 
                 this.#server.listen(this.#port)
                 console.log(`######################################################################`)
@@ -83,20 +86,21 @@ class Spich
             }
             else
             {
-                this.#port = process.env.SERVER_PORT || 80
+                this.#port = this.#config.server_port || 80
 
                 this.#server = http.createServer(this.#app)
                 this.#server.listen(this.#port)
 
                 console.log(`######################################################################`)
-                console.log(`#                      Welcome  to ${this.#project.name}                           #`)
-                console.log(`#      Description ${this.#project.description?this.#project.description:`(no description)`}                             #`)
-                console.log(`#      This server is running on port ${this.#port} in NO SSL Mode               #`)
+                console.log(`#                      Welcome  to ${this.#project.name}                            #`)
+                console.log(`#      Description ${this.#project.description?this.#project.description:`(no description)`}                 #`)
+                console.log(`#      This server is running on port ${this.#port} in NO SSL Mode              #`)
                 console.log(`#      Powered by ${pack.name} (${pack.version})                                      #`)
                 console.log(`######################################################################`)
             }
 
 
+            //todo update socketio version
             global.io = socketio(this.#server)
 
             io.on('connection', (socket) =>
@@ -117,17 +121,26 @@ class Spich
 
             process.on(`uncaughtException`, (err) => console.error(err))
 
-            if ( process.env.ENABLE_OAUTH === `true` )
+            if ( this.#config.authentication !== undefined )
             {
+                const [ database ] = this.#config.databases.filter(({ name }) =>
+                    name === this.#config.authentication.database)
+
                 global.client_names = []
 
-                if ( process.env.DB_TYPE === `postgres` )
+                if ( database.driver === `postgres` )
                 {
-                    const result = await new Database().query(`SELECT LOWER(app_name) app_name FROM ${process.env.DB_SCHEMA || `public`}.applications`)
-
+                    const PGOAuth2Model = await import('./oauth/oauth-pg')
+                    const result = await new Database(database).query(`SELECT LOWER(app_name) app_name FROM applications`)
                     result.map(value => client_names.push(value.app_name))
-
                     this.#app.oauth = new OAuth2Server( { model: new PGOAuth2Model() })
+                }
+                else if ( database.driver === `sqlite` )
+                {
+                    const SQLITEOAuth2Model = await import('./oauth/oauth-sqlite')
+                    const result = await new Database(database).query(`SELECT LOWER(app_name) app_name FROM applications`)
+                    result.map(value => client_names.push(value.app_name))
+                    this.#app.oauth = new OAuth2Server( { model: new SQLITEOAuth2Model() })
                 }
 
                 const { Request, Response } = OAuth2Server
@@ -153,12 +166,12 @@ class Spich
                     global.request = req
                     global.response = res
 
-                    this.#config = await new Router().router(req)
+                    this.#setting = await new Router().router(req)
 
-                    if ( this.#config.public )
+                    if ( this.#setting.public )
                     {
                         new Logger().access(req, res)
-                        await new Bootstrap().run(this.#config, res)
+                        await new Bootstrap().run(this.#setting, res)
                         global.request = null
                         global.response = null
                     }
@@ -177,9 +190,9 @@ class Spich
                             global.request = req
                             global.response = res
                             new Logger().access(req, res)
-                            this.#config = await new Router().router(req)
+                            this.#setting = await new Router().router(req)
 
-                            await new Bootstrap().run(this.#config, res)
+                            await new Bootstrap().run(this.#setting, res)
                             global.request = null
                             global.response = null
                         }
@@ -198,9 +211,9 @@ class Spich
                 {
                     global.request = req
                     global.response = res
-                    this.#config = await new Router().router(req)
+                    this.#setting = await new Router().router(req)
 
-                    await new Bootstrap().run(this.#config, res)
+                    await new Bootstrap().run(this.#setting, res)
                     global.request = null
                     global.response = null
                 })

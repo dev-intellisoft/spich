@@ -11,6 +11,10 @@
  */
 
 import fs from 'fs'
+import read from 'read'
+import Database from './oauth/database.js'
+
+global.APP_PATH = `${process.env.PWD}`
 
 const command = process.argv[2] || ``
 
@@ -24,7 +28,7 @@ const show_help = () =>
     console.log(`       v -> for view`)
     console.log(`       c -> for controller`)
     console.log(`       l -> for library`)
-    console.log(``)
+    console.log(`   enable auth --db [db_name]`)
 }
 
 const source_path = `./node_modules/spich/src/app`
@@ -113,6 +117,39 @@ const create = () =>
     }
 }
 
+const enable = async () =>
+{
+    const [ ,,, mod, db, db_name ] = process.argv
+
+    if ( mod !== `auth` || db !== `--db` )
+        return show_help()
+
+    const { config } = await import(`../example/public/config.js`)
+    if ( config.authentication.enable )
+    {
+        const [ database ] = config.databases.filter(({ name }) => db_name === name)
+        if ( !database )
+            return console.log(`No database configuration for "${db_name}" \n Please include int in "config.js"`)
+
+        read({ prompt: 'Type your application application: ' }, async ( er, applications ) =>
+        {
+            read({ prompt: 'Password: ', silent: true }, async ( er, password ) =>
+            {
+                const db = new Database(database)
+                await db.init()
+                await db.insert_application(applications, password)
+
+                console.log(`You credentials are : applications=${applications}; password=${password}` )
+            })
+        })
+    }
+    else
+    {
+        console.log(`You need to setup auth settings in config.js`)
+        console.log(`Eg.: \n... \n authentication: { \n  enable:false,\n  database:\`sqlite0\`, \n} \n...`)
+    }
+}
+
 switch ( command )
 {
     case `init`:
@@ -120,6 +157,9 @@ switch ( command )
     break
     case `create`:
         create()
+    break
+    case `enable`:
+        enable()
     break
     default:
         show_help()
