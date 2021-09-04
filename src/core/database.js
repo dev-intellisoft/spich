@@ -132,18 +132,19 @@ class  Database
                     filename:`${APP_PATH}/${this.#db_filename}`,
                     driver:sqlite3.Database
                 })
-                if (sql.toLowerCase().startsWith(`select`))
+                if (sql.trim().toLowerCase().startsWith(`select`))
                     return (await db).all(sql)
-                if (sql.toLowerCase().startsWith(`create`))
+                if (sql.trim().toLowerCase().startsWith(`create`))
                     return (await db).run(sql)
-                if (sql.toLowerCase().startsWith(`insert`))
+                if (sql.trim().toLowerCase().startsWith(`insert`))
                     return (await db).run(sql)
-                if (sql.toLowerCase().startsWith(`update`))
+                if (sql.trim().toLowerCase().startsWith(`update`))
                     return (await db).run(sql)
-                if (sql.toLowerCase().startsWith(`delete`))
+                if (sql.trim().toLowerCase().startsWith(`delete`))
                     return (await db).run(sql)
-                if (sql.toLowerCase().startsWith(`drop`))
+                if (sql.trim().toLowerCase().startsWith(`drop`))
                     return (await db).run(sql)
+
             }
             else
             {
