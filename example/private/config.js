@@ -14,14 +14,19 @@ export const config = {
      * ],
      */
     databases:[
+        {
+            name:`sqlite0`,
+            file:`test.db`,
+            driver:`sqlite`
+        }
     ],
-    server_port:80,
+    server_port:8080,
     /**
      * authentication: {
      *    database:`sqlite0`,
      * }
      */
-    // authentication: {
-    //     database:`sqlite0`,
-    // }
+    authentication: {
+        database:`sqlite0`,
+    }
 }

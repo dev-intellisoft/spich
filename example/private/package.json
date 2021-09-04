@@ -2,5 +2,9 @@
   "name": "private",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon  -w ../../src/core -w index.js -w socket.js -w controllers -w models -w libs --exec \"ENV_TYPE='development' node  --es-module-specifier-resolution=node --unhandled-rejections=none index.js\""
+  }
 }
