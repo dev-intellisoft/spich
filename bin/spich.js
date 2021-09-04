@@ -35,6 +35,7 @@ const source_path = `./node_modules/spich/src/app`
 
 const init = () =>
 {
+    const config = fs.readFileSync(`${source_path}/config.js`).toString()
     const index = fs.readFileSync(`${source_path}/index.js`).toString()
     const view = fs.readFileSync(`${source_path}/views/index.html`).toString()
     let controller = fs.readFileSync(`${source_path}/controllers/index.js`).toString()
@@ -66,6 +67,8 @@ const init = () =>
 
     if ( !fs.existsSync(`views/index.html`) )
         fs.writeFileSync(`views/index.html`, view)
+
+    fs.writeFileSync(`config.js`, config)
 }
 
 const create = () =>
