@@ -8,13 +8,19 @@ import fs from 'fs'
 
 class SQLITEOAuth2Model
 {
+    #database
+    constructor(props)
+    {
+        this.#database = props
+    }
+
     getClient = async ( client_id, client_secret, callback ) =>
     {
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
                 const model = new pg_model.default
                 if ( typeof model.getClient === `function`)
                     return await model.getClient ( client_id, client_secret, callback )
@@ -24,17 +30,21 @@ class SQLITEOAuth2Model
                 SELECT 
                     app_id, app_name, app_secret, redirect_uri
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.applications 
+                    applications 
                 WHERE 
                     app_name = '${client_id}' 
                 AND 
-                    app_secret = MD5('${client_secret}')
+                    app_secret = '${client_secret}'
             `
-            const result = await new Database().query(sql)
-            if (!result[0])
+
+            //todo later find a password encode to give more safety
+            // app_secret = MD5('${client_secret}')
+            const [ result ] = await new Database(this.#database).query(sql)
+
+            if (!result)
                 return callback(result)
             else
-                callback(null, { app_id:result[0].app_id,  app_name: result[0].app_name,  clientSecret: result[0].app_secret, grants:[`password`, `authorization_code`, `client_credentials`, `refresh_token`] })
+                callback(null, { app_id:result.app_id,  app_name: result.app_name,  clientSecret: result.app_secret, grants:[`password`, `authorization_code`, `client_credentials`, `refresh_token`] })
         }
         catch ( e )
         {
@@ -46,9 +56,9 @@ class SQLITEOAuth2Model
     {
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
                 const model = new pg_model.default
                 if ( typeof model.grantTypeAllowed === `function`)
                     return await model.grantTypeAllowed ( client_id, grant_type, callback )
@@ -68,29 +78,32 @@ class SQLITEOAuth2Model
     {
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
                 const model = new pg_model.default
                 if ( typeof model.getUser === `function`)
                     return await model.getUser ( username, password, callback )
             }
 
             const sql = `
-                SELECT 
+                SELECT
                     user_id 
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.users 
+                    users 
                 WHERE 
                     email = '${username}' 
                 AND 
-                    password = MD5('${password}')`
-            const result = await new Database().query(sql)
+                    password = '${password}'
+            `
+            //todo later find some way to encode this password.
+            //password = MD5('${password}')
+            const [result] = await new Database(this.#database).query(sql)
 
-            if (!result[0])
+            if (!result)
                 callback(false)
             else
-                callback(null, result[0].user_id)
+                callback(null, result.user_id)
         }
         catch ( e )
         {
@@ -102,9 +115,9 @@ class SQLITEOAuth2Model
     {
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
                 const model = new pg_model.default
                 if ( typeof model.saveRefreshToken === `function`)
                     return await model.saveRefreshToken ( refresh_token, client_id, expires, user_id, callback )
@@ -124,7 +137,7 @@ class SQLITEOAuth2Model
                 WHERE 
                     app_name = '${client_id}'
             `
-            const result = await new Database().query(sql)
+            const result = await new Database(this.#database).query(sql)
             if(!result.error)
                 callback(null, result)
             else
@@ -140,9 +153,9 @@ class SQLITEOAuth2Model
     {
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
                 const model = new pg_model.default
                 if ( typeof model.saveAccessToken === `function`)
                     return await model.saveAccessToken ( access_token, client_id, expires, user_id, callback )
@@ -163,7 +176,7 @@ class SQLITEOAuth2Model
                 WHERE 
                     app_name = '${client_id}'
             `
-            const result = await new Database().query(sql)
+            const result = await new Database(this.#database).query(sql)
             if(!result.error) callback(null, result)
             else callback(result, false)
         }
@@ -178,9 +191,9 @@ class SQLITEOAuth2Model
         try
         {
 
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
                 const model = new pg_model.default
                 if ( typeof model.getAccessToken === `function`)
                     return await model.getAccessToken ( bearer_token )
@@ -198,7 +211,7 @@ class SQLITEOAuth2Model
                 WHERE 
                     access_token = '${bearer_token}'
             `
-            const [ result ] = await new Database().query(sql)
+            const [ result ] = await new Database(this.#database).query(sql)
 
             if (result)
             {
@@ -229,17 +242,16 @@ class SQLITEOAuth2Model
 
     getRefreshToken = async ( bearer_token ) =>
     {
-        console.log ( 7 )
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
                 const model = new pg_model.default
                 if ( typeof model.getRefreshToken === `function`)
                     return await model.getRefreshToken ( bearer_token )
             }
-            
+
             const sql = `
                 SELECT 
                     refresh_token, app_name, expires, user_id 
@@ -249,7 +261,7 @@ class SQLITEOAuth2Model
                     refresh_token = '${bearer_token}'
             `
 
-            const [ result ] = await new Database().query(sql)
+            const [ result ] = await new Database(this.#database).query(sql)
 
             const sql2 = `
                 SELECT 
@@ -260,7 +272,7 @@ class SQLITEOAuth2Model
                     app_name = '${result.app_name}'
             `
 
-            const [ client ] = await new Database().query(sql2)
+            const [ client ] = await new Database(this.#database).query(sql2)
 
 
             const sql3 = `
@@ -272,7 +284,7 @@ class SQLITEOAuth2Model
                     user_id = ${result.user_id}
             `
 
-            const [ user ] = await new Database().query(sql3)
+            const [ user ] = await new Database(this.#database).query(sql3)
 
 
             return {
@@ -293,9 +305,9 @@ class SQLITEOAuth2Model
 
     revokeToken = async() =>
     {
-        if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+        if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
         {
-            const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+            const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
             const model = new pg_model.default
             if ( typeof model.revokeToken === `function`)
                 return await model.revokeToken ()
@@ -309,9 +321,9 @@ class SQLITEOAuth2Model
     {
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-sqlite.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/oauth-sqlite`)
                 const model = new pg_model.default
                 if ( typeof model.saveToken === `function`)
                     return await model.saveToken ( token, { app_id, app_name }, user_id )
@@ -319,31 +331,41 @@ class SQLITEOAuth2Model
 
             const at_expires = new Date(token.accessTokenExpiresAt).toUTCString()
 
-                console.log(`
+            await new Database(this.#database).query(`
                 INSERT INTO 
-                    ${process.env.DB_SCHEMA || `public`}.access_tokens
+                    access_tokens
                     ( access_token, expires, app_id, app_name, user_id )
                 VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING access_token, expires, app_id, app_name, user_id
+--                 RETURNING access_token, expires, app_id, app_name, user_id
             `)
-            const [ access_token ] = await new Database().query(`
-                INSERT INTO 
-                    ${process.env.DB_SCHEMA || `public`}.access_tokens
-                    ( access_token, expires, app_id, app_name, user_id )
-                VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING access_token, expires, app_id, app_name, user_id
+            const [ access_token ] = await new Database(this.#database).query(`
+                SELECT 
+                    access_token, expires, app_id, app_name, user_id
+                FROM
+                    access_tokens
+                WHERE
+                    access_token = '${token.accessToken}'
             `)
 
             console.log ( access_token )
 
             const rt_expires = new Date(token.refreshTokenExpiresAt).toUTCString()
 
-            const [ refresh_token ] = await new Database().query(`
+            await new Database(this.#database).query(`
                 INSERT INTO
-                    ${process.env.DB_SCHEMA || `public`}.refresh_tokens
+                    refresh_tokens
                     ( refresh_token, expires, app_id, app_name , user_id )
                 VALUES( '${token.refreshToken}', '${rt_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING refresh_token, expires, app_id, app_name , user_id
+--                 RETURNING refresh_token, expires, app_id, app_name , user_id
+            `)
+
+            const [ refresh_token ] = await new Database(this.#database).query(`
+                SELECT
+                    refresh_token, expires, app_id, app_name , user_id
+                FROM
+                    refresh_tokens
+                WHERE
+                    refresh_token = '${token.refreshToken}'
             `)
 
             return {
