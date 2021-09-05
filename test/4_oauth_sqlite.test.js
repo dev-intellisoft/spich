@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import axios from 'axios'
 import qs from 'qs'
+import users  from './users.mjs'
 
 
 describe('SQLITE OAUTH2', async () =>
@@ -13,7 +14,7 @@ describe('SQLITE OAUTH2', async () =>
 
     after(async () =>
     {
-        await axios.delete(`/users`)
+        // await axios.delete(`/users`)
     })
 
     it (`should not be able to access private area`, async () =>
@@ -30,22 +31,14 @@ describe('SQLITE OAUTH2', async () =>
 
     it (`should create a user`, async () =>
     {
-        const { data } = await axios.post(`/users`, {
-            username:`José`,
-            email:`jose@test.com`,
-            password:`12345678`
-        })
+        const { data } = await axios.post(`/users`, users.jose)
 
         assert.equal(data.changes, 1)
     })
 
     it(`should not be able to create duplicate user`, async () =>
     {
-        const { data } = await axios.post(`/users`, {
-            username:`José`,
-            email:`jose@test.com`,
-            password:`12345678`
-        })
+        const { data } = await axios.post(`/users`, users.jose)
         assert.equal(data.code, `SQLITE_CONSTRAINT`)
     })
 
@@ -54,12 +47,13 @@ describe('SQLITE OAUTH2', async () =>
         axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
         axios.defaults.headers.common['Authorization'] = 'Basic dGVzdDp0ZXN0'
         const credentials = qs.stringify({
-            'username': `jose@test.com`,
-            'password': `12345678`,
+            'username': users.jose.email,
+            'password': users.jose.password,
             'grant_type': 'password'
         })
         const {data} = await axios.post(`/oauth/token`, credentials)
         axios.defaults.headers.common['Content-Type'] = 'application/json'
         assert.equal(data.client, `test`)
     })
+
 })
