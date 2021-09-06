@@ -256,7 +256,7 @@ class SQLITEOAuth2Model
                 SELECT 
                     refresh_token, app_name, expires, user_id 
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.refresh_tokens 
+                    refresh_tokens 
                 WHERE 
                     refresh_token = '${bearer_token}'
             `
@@ -267,7 +267,7 @@ class SQLITEOAuth2Model
                 SELECT 
                     app_id, app_name
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.applications
+                    applications
                 WHERE 
                     app_name = '${result.app_name}'
             `
@@ -279,7 +279,7 @@ class SQLITEOAuth2Model
                 SELECT 
                     *
                 FROM
-                    ${process.env.DB_SCHEMA || `public`}.users
+                    users
                 WHERE   
                     user_id = ${result.user_id}
             `
@@ -289,7 +289,7 @@ class SQLITEOAuth2Model
 
             return {
                 refreshToken: result.refresh_token,
-                refreshTokenExpiresAt: result.expires,
+                refreshTokenExpiresAt: new Date(result.expires),
                 scope: [`read`, `write`],
                 client: client.app_name, // with 'id' property
                 user: user.user_id

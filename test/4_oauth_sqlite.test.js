@@ -107,6 +107,18 @@ describe('SQLITE OAUTH2', async () =>
                 assert.equal(e.response.data.name, `invalid_token`)
             }
         })
+
+        it(`should refresh access_token`, async () =>
+        {
+            axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
+            axios.defaults.headers.common['Authorization'] = 'Basic dGVzdDp0ZXN0'
+            const credentials = qs.stringify({
+                'refresh_token': refresh_token,
+                'grant_type': 'refresh_token'
+            })
+            const {data} = await axios.post(`/oauth/token`, credentials)
+            assert.ok(data.access_token !== undefined)
+        })
     })
 
 })
