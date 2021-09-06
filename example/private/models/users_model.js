@@ -46,6 +46,32 @@ class Users_Model extends Model
             return  e
         }
     }
+
+    async revoke_access_token( access_token )
+    {
+        try
+        {
+            let [{ expires }] = await this.query(`
+                SELECT expires FROM access_tokens WHERE access_token = '${access_token}'
+            `)
+            expires = new Date(expires)
+            expires = new Date(new Date(expires).setHours(expires.getHours() - 2))
+            const sql = `
+                UPDATE
+                    access_tokens
+                SET
+                    expires = '${expires}'
+                WHERE
+                    access_token = '${access_token}'
+            `
+            return await this.query(sql)
+        }
+        catch (e)
+        {
+            console.log(e)
+            return e
+        }
+    }
 }
 
 export default Users_Model

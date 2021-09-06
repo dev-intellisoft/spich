@@ -59,6 +59,7 @@ describe('SQLITE OAUTH2', async () =>
     describe(`test authenticated endpoint`, async () =>
     {
         let access_token
+        let refresh_token
         before(async () =>
         {
             axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -71,6 +72,7 @@ describe('SQLITE OAUTH2', async () =>
             const {data} = await axios.post(`/oauth/token`, credentials)
             axios.defaults.headers.common['Content-Type'] = 'application/json'
             access_token = data.access_token
+            refresh_token = data.refresh_token
         })
 
         it(`should not access private endpoint`, async () =>
@@ -90,6 +92,20 @@ describe('SQLITE OAUTH2', async () =>
             axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
             const { data } = await axios.get(`/`)
             assert.equal(data, `OK`)
+        })
+
+        it(`should expire access_token`, async () =>
+        {
+            try
+            {
+                await axios.get(`/users/revoke/${access_token}`)
+                axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+                await axios.get(`/`)
+            }
+            catch (e)
+            {
+                assert.equal(e.response.data.name, `invalid_token`)
+            }
         })
     })
 
