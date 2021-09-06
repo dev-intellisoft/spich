@@ -39,7 +39,7 @@ class Index extends Controller
      */
     async index()
     {
-        return this.view(`index`)
+        return `OK`
     }
 }
 

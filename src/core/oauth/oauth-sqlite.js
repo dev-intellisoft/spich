@@ -203,9 +203,9 @@ class SQLITEOAuth2Model
                 SELECT 
                     at.access_token, at.app_name, at.expires, at.user_id, at.app_id
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.access_tokens at
+                    access_tokens at
                 LEFT JOIN 
-                    ${process.env.DB_SCHEMA || `public`}.users u 
+                    users u 
                 ON 
                     u.user_id = at.user_id
                 WHERE 
@@ -218,8 +218,8 @@ class SQLITEOAuth2Model
                 return {
                     accessToken: result.access_token,
                     clientId: result.app_id,
-                    expires: result.expires,
-                    accessTokenExpiresAt:result.expires,
+                    expires: new Date(result.expires),
+                    accessTokenExpiresAt:new Date(result.expires),
                     user_id: result.user_id,
                     app_id: result.app_id,
                     app_name: result.app_name,
@@ -346,8 +346,6 @@ class SQLITEOAuth2Model
                 WHERE
                     access_token = '${token.accessToken}'
             `)
-
-            console.log ( access_token )
 
             const rt_expires = new Date(token.refreshTokenExpiresAt).toUTCString()
 

@@ -56,4 +56,41 @@ describe('SQLITE OAUTH2', async () =>
         assert.equal(data.client, `test`)
     })
 
+    describe(`test authenticated endpoint`, async () =>
+    {
+        let access_token
+        before(async () =>
+        {
+            axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
+            axios.defaults.headers.common['Authorization'] = 'Basic dGVzdDp0ZXN0'
+            const credentials = qs.stringify({
+                'username': users.jose.email,
+                'password': users.jose.password,
+                'grant_type': 'password'
+            })
+            const {data} = await axios.post(`/oauth/token`, credentials)
+            axios.defaults.headers.common['Content-Type'] = 'application/json'
+            access_token = data.access_token
+        })
+
+        it(`should not access private endpoint`, async () =>
+        {
+            try
+            {
+                await axios.get(`/`)
+            }
+            catch (e)
+            {
+                assert.equal(e.message, `Request failed with status code 400`)
+            }
+        })
+
+        it(`should access private endpoint`, async () =>
+        {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+            const { data } = await axios.get(`/`)
+            assert.equal(data, `OK`)
+        })
+    })
+
 })
