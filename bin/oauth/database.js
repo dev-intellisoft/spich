@@ -58,20 +58,46 @@ class Database
 
             return (await db).all(sql)
         }
+        else if ( this.#db_driver === `mysql` )
+        {
+            return new Promise( (resolve, reject) =>
+            {
+                let res
+                const connection = mysql.createConnection({
+                    host: this.#db_host,
+                    user: this.#db_user,
+                    password: this.#db_password,
+                    database: this.#db_database
+                })
+                connection.connect()
+
+                connection.query(sql, async (error, results, fields) =>
+                {
+                    if (error) {
+                        console.log(sql)
+                        throw error
+                    }
+                    return resolve(results) && connection.end()
+                })
+            })
+        }
     }
 
     create_refresh_tokens_table = async () =>
     {
         try
         {
+            let fragment = `NOT NULL`
+            if ( this.#db_driver === `mysql` )
+                fragment = ``
             const sql = `
                 CREATE TABLE IF NOT EXISTS refresh_tokens
                 (
                     app_id INTEGER NOT NULL,
                     user_id INTEGER  NULL,
                     app_name VARCHAR (50) NOT NULL,
-                    refresh_token VARCHAR NOT NULL,
-                    expires TIMESTAMP NOT NULL
+                    refresh_token VARCHAR(255) NOT NULL,
+                    expires TIMESTAMP ${fragment}
                 )
             `
             return await this.query(sql)
@@ -86,13 +112,16 @@ class Database
     {
         try
         {
+            let fragment = `WITH TIME ZONE NOT NULL`
+            if ( this.#db_driver === `mysql` )
+                fragment = ``
             const sql = `
                 CREATE TABLE IF NOT EXISTS access_tokens
                 (
                     access_token VARCHAR (255) NOT NULL,
                     app_name     VARCHAR (50) NOT NULL,
                     user_id      INTEGER NOT NULL REFERENCES users,
-                    expires      TIMESTAMP WITH TIME ZONE NOT NULL,
+                    expires      TIMESTAMP ${fragment},
                     app_id       INTEGER NOT NULL
                             REFERENCES applications
                 )
@@ -109,10 +138,13 @@ class Database
     {
         try
         {
+            let fragment = ``
+            if ( this.#db_name === `mysql` )
+                fragment = `AUTO_INCREMENT`
             const sql = `
                 CREATE TABLE IF NOT EXISTS applications
                 (
-                    app_id       INTEGER NOT NULL PRIMARY KEY,
+                    app_id       INTEGER NOT NULL ${fragment} PRIMARY KEY,
                     app_name     VARCHAR (50) NOT NULL UNIQUE ,
                     app_secret   VARCHAR (255) NOT NULL,
                     redirect_uri VARCHAR (255),
@@ -153,7 +185,7 @@ class Database
         try
         {
             const sql = `
-                INSERT INTO applications(app_name, app_secret) VALUES('${application}', '${password}')
+                INSERT IGNORE INTO applications(app_name, app_secret) VALUES('${application}', '${password}')
             `
             return await this.query(sql)
         }
