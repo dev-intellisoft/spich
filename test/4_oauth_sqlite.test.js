@@ -14,7 +14,7 @@ describe('SQLITE OAUTH2', async () =>
 
     after(async () =>
     {
-        // await axios.delete(`/users`)
+        await axios.delete(`/users`)
     })
 
     it (`should not be able to access private area`, async () =>
