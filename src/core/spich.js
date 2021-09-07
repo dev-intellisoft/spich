@@ -142,6 +142,13 @@ class Spich
                     result.map(value => client_names.push(value.app_name))
                     this.#app.oauth = new OAuth2Server( { model: new SQLITEOAuth2Model(database) })
                 }
+                else if ( database.driver === `mysql` )
+                {
+                    const MYSQLOAuth2Model = (await import('./oauth/oauth-mysql')).default
+                    const result = await new Database(database).query(`SELECT LOWER(app_name) app_name FROM applications`)
+                    result.map(value => client_names.push(value.app_name))
+                    this.#app.oauth = new OAuth2Server( { model: new MYSQLOAuth2Model(database) })
+                }
 
                 const { Request, Response } = OAuth2Server
 
