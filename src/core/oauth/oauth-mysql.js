@@ -8,8 +8,15 @@ import fs from 'fs'
 
 class PGOAuth2Model
 {
+    #database
+    constructor(props)
+    {
+        this.#database = props
+    }
+
     getClient = async ( client_id, client_secret, callback ) =>
     {
+        console.log(1)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -24,17 +31,28 @@ class PGOAuth2Model
                 SELECT 
                     app_id, app_name, app_secret, redirect_uri
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.applications 
+                    applications 
                 WHERE 
                     app_name = '${client_id}' 
                 AND 
-                    app_secret = MD5('${client_secret}')
+                    app_secret = '${client_secret}'
             `
-            const result = await new Database().query(sql)
-            if (!result[0])
+            // app_secret = MD5('${client_secret}')
+            const [ result ] = await new Database(this.#database).query(sql)
+            if (!result)
                 return callback(result)
-            else
-                callback(null, { app_id:result[0].app_id,  app_name: result[0].app_name,  clientSecret: result[0].app_secret, grants:[`password`, `authorization_code`, `client_credentials`, `refresh_token`] })
+
+            callback(null, {
+                app_id:result.app_id,
+                app_name: result.app_name,
+                clientSecret: result.app_secret,
+                grants:[
+                    `password`,
+                    `authorization_code`,
+                    `client_credentials`,
+                    `refresh_token`
+                ]
+            })
         }
         catch ( e )
         {
@@ -44,6 +62,7 @@ class PGOAuth2Model
 
     grantTypeAllowed = async ( client_id, grant_type, callback ) =>
     {
+        console.log(2)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -56,7 +75,8 @@ class PGOAuth2Model
 
             if ( grant_type === `password` || grant_type === `refresh_token` )
                 return callback(false, client_names.indexOf(client_id.toLowerCase()) >= 0)
-            callback(false, true);
+
+            return callback(false, true);
         }
         catch ( e )
         {
@@ -66,6 +86,7 @@ class PGOAuth2Model
 
     getUser = async ( username, password, callback ) =>
     {
+        console.log(3)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -80,17 +101,19 @@ class PGOAuth2Model
                 SELECT 
                     user_id 
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.users 
+                    users 
                 WHERE 
                     email = '${username}' 
                 AND 
-                    password = MD5('${password}')`
-            const result = await new Database().query(sql)
+                    password = '${password}'
+            `
+            // password = MD5('${password}')
+            const [{ user_id }] = await new Database(this.#database).query(sql)
 
-            if (!result[0])
-                callback(false)
-            else
-                callback(null, result[0].user_id)
+            if (!user_id)
+                return callback(false)
+
+            return callback(null, user_id)
         }
         catch ( e )
         {
@@ -100,6 +123,7 @@ class PGOAuth2Model
 
     saveRefreshToken = async ( refresh_token, client_id, expires, user_id, callback ) =>
     {
+        console.log(4)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -124,7 +148,7 @@ class PGOAuth2Model
                 WHERE 
                     app_name = '${client_id}'
             `
-            const result = await new Database().query(sql)
+            const result = await new Database(this.#database).query(sql)
             if(!result.error)
                 callback(null, result)
             else
@@ -138,6 +162,7 @@ class PGOAuth2Model
 
     saveAccessToken = async ( access_token, client_id, expires, user_id, callback ) =>
     {
+        console.log(5)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -163,7 +188,7 @@ class PGOAuth2Model
                 WHERE 
                     app_name = '${client_id}'
             `
-            const result = await new Database().query(sql)
+            const result = await new Database(this.#database).query(sql)
             if(!result.error) callback(null, result)
             else callback(result, false)
         }
@@ -175,6 +200,7 @@ class PGOAuth2Model
 
     getAccessToken = async ( bearer_token ) =>
     {
+        console.log(6)
         try
         {
 
@@ -198,7 +224,7 @@ class PGOAuth2Model
                 WHERE 
                     access_token = '${bearer_token}'
             `
-            const [ result ] = await new Database().query(sql)
+            const [ result ] = await new Database(this.#database).query(sql)
 
             if (result)
             {
@@ -249,7 +275,7 @@ class PGOAuth2Model
                     refresh_token = '${bearer_token}'
             `
 
-            const [ result ] = await new Database().query(sql)
+            const [ result ] = await new Database(this.#database).query(sql)
 
             const sql2 = `
                 SELECT 
@@ -260,7 +286,7 @@ class PGOAuth2Model
                     app_name = '${result.app_name}'
             `
 
-            const [ client ] = await new Database().query(sql2)
+            const [ client ] = await new Database(this.#database).query(sql2)
 
 
             const sql3 = `
@@ -272,7 +298,7 @@ class PGOAuth2Model
                     user_id = ${result.user_id}
             `
 
-            const [ user ] = await new Database().query(sql3)
+            const [ user ] = await new Database(this.#database).query(sql3)
 
 
             return {
@@ -293,6 +319,7 @@ class PGOAuth2Model
 
     revokeToken = async() =>
     {
+        console.log(8)
         if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
         {
             const pg_model = await import(`${APP_PATH}/core/model/oauth-mysql`)
@@ -307,6 +334,7 @@ class PGOAuth2Model
     
     saveToken = async ( token, { app_id, app_name }, user_id ) =>
     {
+        console.log(9)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -317,33 +345,42 @@ class PGOAuth2Model
                     return await model.saveToken ( token, { app_id, app_name }, user_id )
             }
 
-            const at_expires = new Date(token.accessTokenExpiresAt).toUTCString()
+            const at_expires = new Date(token.accessTokenExpiresAt)
+                .toISOString().slice(0, 19).replace('T', ' ')
 
-                console.log(`
+            await new Database(this.#database).query(`
                 INSERT INTO 
-                    ${process.env.DB_SCHEMA || `public`}.access_tokens
+                    access_tokens
                     ( access_token, expires, app_id, app_name, user_id )
                 VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING access_token, expires, app_id, app_name, user_id
-            `)
-            const [ access_token ] = await new Database().query(`
-                INSERT INTO 
-                    ${process.env.DB_SCHEMA || `public`}.access_tokens
-                    ( access_token, expires, app_id, app_name, user_id )
-                VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING access_token, expires, app_id, app_name, user_id
             `)
 
-            console.log ( access_token )
+            const [ access_token ] = await new Database(this.#database).query(`
+                SELECT 
+                    access_token, expires, app_id, app_name, user_id
+                FROM
+                    access_tokens
+                WHERE
+                    access_token = '${token.accessToken}'
+            `)
 
-            const rt_expires = new Date(token.refreshTokenExpiresAt).toUTCString()
+            const rt_expires = new Date(token.refreshTokenExpiresAt)
+                .toISOString().slice(0, 19).replace('T', ' ')
 
-            const [ refresh_token ] = await new Database().query(`
+            await new Database(this.#database).query(`
                 INSERT INTO
-                    ${process.env.DB_SCHEMA || `public`}.refresh_tokens
+                    refresh_tokens
                     ( refresh_token, expires, app_id, app_name , user_id )
                 VALUES( '${token.refreshToken}', '${rt_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING refresh_token, expires, app_id, app_name , user_id
+            `)
+
+            const  [ refresh_token ] = await new Database(this.#database).query(`
+                SELECT 
+                     refresh_token, expires, app_id, app_name , user_id
+                FROM 
+                    refresh_tokens
+                WHERE
+                    refresh_token = '${token.refreshToken}'
             `)
 
             return {
