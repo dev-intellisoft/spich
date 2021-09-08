@@ -120,7 +120,7 @@ class  Database
 
                     connection.query(sql, (error, results, fields) =>
                     {
-                        if (error) throw error
+                        if (error) reject(error)
                         resolve(results) && connection.end()
                     })
 
