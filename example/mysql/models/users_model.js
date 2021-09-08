@@ -42,7 +42,6 @@ class Users_Model extends Model
         }
         catch (e)
         {
-            console.log(`~~~~~~~~~~>`, e)
             return  e
         }
     }
@@ -68,7 +67,6 @@ class Users_Model extends Model
         }
         catch (e)
         {
-            console.log(e)
             return e
         }
     }
