@@ -5,6 +5,7 @@
 import Database from '../database'
 import Logger from '../logger'
 import fs from 'fs'
+import moment from 'moment-timezone'
 
 class PGOAuth2Model
 {
@@ -208,7 +209,7 @@ class PGOAuth2Model
             {
                 const pg_model = await import(`${APP_PATH}/core/model/oauth-mysql`)
                 const model = new pg_model.default
-                if ( typeof model.getAccessToken === `function`)
+                if ( typeof model.getAccessToken === `function` )
                     return await model.getAccessToken ( bearer_token )
             }
 
@@ -224,10 +225,12 @@ class PGOAuth2Model
                 WHERE 
                     access_token = '${bearer_token}'
             `
+
             const [ result ] = await new Database(this.#database).query(sql)
 
             if (result)
             {
+                console.log(`~~~~~~~~~~>`)
                 return {
                     accessToken: result.access_token,
                     clientId: result.app_id,
@@ -344,8 +347,9 @@ class PGOAuth2Model
                     return await model.saveToken ( token, { app_id, app_name }, user_id )
             }
 
-            const at_expires = new Date(token.accessTokenExpiresAt)
-                .toISOString().slice(0, 19).replace('T', ' ')
+            const at_expires = moment(token.accessTokenExpiresAt)
+                .tz(`Asia/Dubai`).format()
+                .slice(0, 19).replace(`T`, ` `)
 
             await new Database(this.#database).query(`
                 INSERT INTO 

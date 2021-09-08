@@ -34,6 +34,7 @@
     "fs": "^0.0.1-security",
     "helmet": "^3.21.2",
     "moment": "^2.24.0",
+    "moment-timezone": "^0.5.33",
     "mustache": "^4.0.0",
     "mysql2": "^2.3.0",
     "oauth2-server": "^3.0.1",
