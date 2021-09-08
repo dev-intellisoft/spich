@@ -297,7 +297,6 @@ class SQLITEOAuth2Model
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }

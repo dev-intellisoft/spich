@@ -285,7 +285,6 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }
@@ -333,8 +332,6 @@ class PGOAuth2Model
                 VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
                 RETURNING access_token, expires, app_id, app_name, user_id
             `)
-
-            console.log ( access_token )
 
             const rt_expires = new Date(token.refreshTokenExpiresAt).toUTCString()
 

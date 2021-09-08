@@ -142,8 +142,6 @@ const enable = async () =>
                 const db = new Database(database)
                 await db.init()
                 await db.insert_application(applications, password)
-
-                console.log(`You credentials are : applications=${applications}; password=${password}` )
             })
         })
     }

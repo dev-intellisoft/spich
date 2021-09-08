@@ -36,7 +36,6 @@ class Sqlite extends Controller
         }
         catch (e)
         {
-            console.log(e)
             return `ERR`
         }
     }

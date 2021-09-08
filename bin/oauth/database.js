@@ -73,10 +73,7 @@ class Database
 
                 connection.query(sql, async (error, results, fields) =>
                 {
-                    if (error) {
-                        console.log(sql)
-                        throw error
-                    }
+                    if (error) throw error
                     return resolve(results) && connection.end()
                 })
             })
@@ -104,7 +101,7 @@ class Database
         }
         catch (e)
         {
-            console.log(e)
+            return  e
         }
     }
 
@@ -151,12 +148,11 @@ class Database
                     description  VARCHAR (255)
                 )
             `
-            console.log(sql)
             return await this.query(sql)
         }
         catch (e)
         {
-            console.log(e)
+            return e
         }
     }
 
@@ -176,12 +172,11 @@ class Database
                     password VARCHAR (255) NOT NULL
                 )
             `
-            console.log(sql)
             return await this.query(sql)
         }
         catch (e)
         {
-            console.log(e)
+            return e
         }
     }
 
@@ -196,7 +191,7 @@ class Database
         }
         catch (e)
         {
-            console.log(e)
+            return e
         }
     }
 

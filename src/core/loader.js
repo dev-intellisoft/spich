@@ -22,7 +22,6 @@ class Loader
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }
@@ -37,7 +36,6 @@ class Loader
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }
@@ -52,7 +50,6 @@ class Loader
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }
@@ -65,7 +62,6 @@ class Loader
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }
@@ -82,7 +78,6 @@ class Loader
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }

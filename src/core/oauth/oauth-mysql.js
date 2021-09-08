@@ -23,7 +23,7 @@ class PGOAuth2Model
             {
                 const pg_model = await import(`${APP_PATH}/core/model/oauth-mysql`)
                 const model = new pg_model.default
-                if ( typeof model.getClient === `function`)
+                if ( typeof model.getClient === `function` )
                     return await model.getClient ( client_id, client_secret, callback )
             }
 
@@ -173,18 +173,18 @@ class PGOAuth2Model
                     return await model.saveAccessToken ( access_token, client_id, expires, user_id, callback )
             }
 
-            const timezone = process.env.TIMEZONE || 'GMT'
+            const timezone = process.env.TIMEZONE || 'GST'
             if(user_id.id) user_id = user_id.id
             expires = expires.toString().replace(/GMT.*$/, timezone)
             const sql = `
                 INSERT INTO 
-                    ${process.env.DB_SCHEMA || `public`}.access_tokens(
+                    access_tokens(
                         app_id, user_id, access_token, app_name,  expires
                     )
                 SELECT 
                     app_id, '${user_id}', '${access_token}', app_name, '${expires}'
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.applications 
+                    applications 
                 WHERE 
                     app_name = '${client_id}'
             `
@@ -216,9 +216,9 @@ class PGOAuth2Model
                 SELECT 
                     at.access_token, at.app_name, at.expires, at.user_id, at.app_id
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.access_tokens at
+                    access_tokens at
                 LEFT JOIN 
-                    ${process.env.DB_SCHEMA || `public`}.users u 
+                    users u 
                 ON 
                     u.user_id = at.user_id
                 WHERE 
@@ -311,7 +311,6 @@ class PGOAuth2Model
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }

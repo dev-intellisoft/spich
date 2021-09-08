@@ -22,7 +22,6 @@ class Input
         }
         catch ( e )
         {
-            console.log ( e )
             new Logger().error(e)
         }
     }
