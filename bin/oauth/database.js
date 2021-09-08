@@ -139,7 +139,7 @@ class Database
         try
         {
             let fragment = ``
-            if ( this.#db_name === `mysql` )
+            if ( this.#db_driver === `mysql` )
                 fragment = `AUTO_INCREMENT`
             const sql = `
                 CREATE TABLE IF NOT EXISTS applications
@@ -151,6 +151,7 @@ class Database
                     description  VARCHAR (255)
                 )
             `
+            console.log(sql)
             return await this.query(sql)
         }
         catch (e)
@@ -163,16 +164,20 @@ class Database
     {
         try
         {
+            let fragment = ``
+            if ( this.#db_driver === `mysql` )
+                fragment = `AUTO_INCREMENT`
             const sql = `
                 CREATE TABLE IF NOT EXISTS users
                 (
-                    user_id INTEGER NOT NULL PRIMARY KEY,
+                    user_id INTEGER NOT NULL ${fragment} PRIMARY KEY,
                     email VARCHAR (255) NOT NULL UNIQUE,
                     username VARCHAR (255) NOT NULL UNIQUE,
                     password VARCHAR (255) NOT NULL
                 )
             `
-            await this.query(sql)
+            console.log(sql)
+            return await this.query(sql)
         }
         catch (e)
         {
