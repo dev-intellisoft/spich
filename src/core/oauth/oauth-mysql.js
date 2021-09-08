@@ -224,7 +224,6 @@ class PGOAuth2Model
 
             if (result)
             {
-                console.log(`~~~~~~~~~~>`)
                 return {
                     accessToken: result.access_token,
                     clientId: result.app_id,
