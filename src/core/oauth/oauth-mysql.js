@@ -17,7 +17,6 @@ class PGOAuth2Model
 
     getClient = async ( client_id, client_secret, callback ) =>
     {
-        console.log(1)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -63,7 +62,6 @@ class PGOAuth2Model
 
     grantTypeAllowed = async ( client_id, grant_type, callback ) =>
     {
-        console.log(2)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -87,7 +85,6 @@ class PGOAuth2Model
 
     getUser = async ( username, password, callback ) =>
     {
-        console.log(3)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -124,7 +121,6 @@ class PGOAuth2Model
 
     saveRefreshToken = async ( refresh_token, client_id, expires, user_id, callback ) =>
     {
-        console.log(4)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -163,7 +159,6 @@ class PGOAuth2Model
 
     saveAccessToken = async ( access_token, client_id, expires, user_id, callback ) =>
     {
-        console.log(5)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -201,7 +196,6 @@ class PGOAuth2Model
 
     getAccessToken = async ( bearer_token ) =>
     {
-        console.log(6)
         try
         {
 
@@ -258,7 +252,6 @@ class PGOAuth2Model
 
     getRefreshToken = async ( bearer_token ) =>
     {
-        console.log ( 7 )
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
@@ -273,7 +266,7 @@ class PGOAuth2Model
                 SELECT 
                     refresh_token, app_name, expires, user_id 
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.refresh_tokens 
+                    refresh_tokens 
                 WHERE 
                     refresh_token = '${bearer_token}'
             `
@@ -284,7 +277,7 @@ class PGOAuth2Model
                 SELECT 
                     app_id, app_name
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.applications
+                   applications
                 WHERE 
                     app_name = '${result.app_name}'
             `
@@ -296,7 +289,7 @@ class PGOAuth2Model
                 SELECT 
                     *
                 FROM
-                    ${process.env.DB_SCHEMA || `public`}.users
+                    users
                 WHERE   
                     user_id = ${result.user_id}
             `
@@ -321,7 +314,6 @@ class PGOAuth2Model
 
     revokeToken = async() =>
     {
-        console.log(8)
         if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
         {
             const pg_model = await import(`${APP_PATH}/core/model/oauth-mysql`)
@@ -336,7 +328,6 @@ class PGOAuth2Model
     
     saveToken = async ( token, { app_id, app_name }, user_id ) =>
     {
-        console.log(9)
         try
         {
             if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-mysql.js`) )
