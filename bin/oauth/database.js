@@ -49,7 +49,36 @@ class Database
 
     query = async (sql) =>
     {
-        if ( this.#db_driver === `sqlite` )
+        if ( this.#db_driver === `postgres` )
+        {
+            const user = this.#db_user
+            const password = this.#db_password
+            const host = this.#db_host
+            const database = this.#db_database
+
+            return new Promise(function (resolve, reject)
+            {
+                const config = { user, password, host, database, max:10, idleTimeoutMillis: 1000 }
+
+                const pool = new Pool(config)
+
+                pool.on(`error`, (e, client) =>
+                {
+                    console.log(e)
+                    console.log(client)
+                })
+
+                pool.query(sql, (err, result) =>
+                {
+                    if (err)
+                        return resolve(err)
+
+                    if ( typeof result === undefined ) resolve([])
+                    resolve(result.rows)
+                })
+            })
+        }
+        else if ( this.#db_driver === `sqlite` )
         {
             const db = open({
                 filename:`${APP_PATH}/${this.#db_filename}`,
