@@ -109,19 +109,28 @@ class  Database
             {
                 return new Promise( (resolve, reject) =>
                 {
-                    let res
-                    const connection = mysql.createConnection({
+                    const pool = mysql.createPool({
                         host: this.#db_host,
                         user: this.#db_user,
+                        database: this.#db_password,
                         password: this.#db_password,
-                        database: this.#db_database
-                    })
-                    connection.connect()
+                        waitForConnections: true,
+                        connectionLimit: 20,
+                        queueLimit: 0
+                    });
 
-                    connection.query(sql, (error, results, fields) =>
+                    // const connection = mysql.createConnection({
+                    //     host: this.#db_host,
+                    //     user: this.#db_user,
+                    //     password: this.#db_password,
+                    //     database: this.#db_database
+                    // })
+                    // connection.connect()
+
+                    pool.query(sql, (error, results, fields) =>
                     {
                         if (error) reject(error)
-                        resolve(results) && connection.end()
+                        resolve(results) && pool.end()
                     })
 
                 })

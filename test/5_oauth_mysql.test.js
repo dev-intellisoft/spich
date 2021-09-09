@@ -25,7 +25,8 @@ describe('MYSQL OAUTH2', async () =>
         }
         catch (e)
         {
-            assert.equal(e.response.data.name, `unauthorized_request`)
+            assert.equal(e.response.data.name, `invalid_request`)
+            // assert.equal(e.response.data.name, `unauthorized_request`)
         }
     })
 
