@@ -73,7 +73,7 @@ class Database
                     if (err)
                         return resolve(err)
 
-                    if ( typeof result === undefined ) resolve([])
+                     if ( typeof result === undefined ) resolve([])
                     resolve(result.rows)
                 })
             })
@@ -177,6 +177,19 @@ class Database
                     description  VARCHAR (255)
                 )
             `
+
+            if ( this.#db_driver === `postgres` )
+            {
+                await this.query(`
+                    CREATE SEQUENCE IF NOT EXISTS app_id_seq
+                `)
+
+                await this.query(`
+                    ALTER TABLE applications
+                    ALTER COLUMN app_id SET DEFAULT nextval('app_id_seq')
+                `)
+            }
+
             return await this.query(sql)
         }
         catch (e)
@@ -213,9 +226,17 @@ class Database
     {
         try
         {
-            const sql = `
+            let sql = `
                 INSERT IGNORE INTO applications(app_name, app_secret) VALUES('${application}', '${password}')
             `
+            if ( this.#db_driver === `postgres` )
+            {
+                sql = `
+                    INSERT INTO applications(app_name, app_secret) VALUES('${application}', '${password}')
+                    ON CONFLICT (app_name) 
+                    DO NOTHING
+                `
+            }
             return await this.query(sql)
         }
         catch (e)
