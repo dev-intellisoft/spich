@@ -70,7 +70,7 @@ class PGOAuth2Model
 
             if ( grant_type === `password` || grant_type === `refresh_token` )
                 return callback(false, client_names.indexOf(client_id.toLowerCase()) >= 0)
-            callback(false, true);
+            return callback(false, true);
         }
         catch ( e )
         {
@@ -102,7 +102,7 @@ class PGOAuth2Model
                     password = '${password}'
             `
             // password = MD5('${password}')
-            const result = await new Database(this.#database).query(sql)
+            const [ result ] = await new Database(this.#database).query(sql)
 
             if (!result)
                 callback(false)
@@ -275,7 +275,7 @@ class PGOAuth2Model
                 SELECT 
                     app_id, app_name
                 FROM 
-                    ${process.env.DB_SCHEMA || `public`}.applications
+                    applications
                 WHERE 
                     app_name = '${result.app_name}'
             `
@@ -287,7 +287,7 @@ class PGOAuth2Model
                 SELECT 
                     *
                 FROM
-                    ${process.env.DB_SCHEMA || `public`}.users
+                   users
                 WHERE   
                     user_id = ${result.user_id}
             `
@@ -340,13 +340,6 @@ class PGOAuth2Model
 
             const at_expires = new Date(token.accessTokenExpiresAt).toUTCString()
 
-                console.log(`
-                INSERT INTO 
-                    access_tokens
-                    ( access_token, expires, app_id, app_name, user_id )
-                VALUES ( '${token.accessToken}', '${at_expires}', ${app_id}, '${app_name}', ${user_id} )
-                RETURNING access_token, expires, app_id, app_name, user_id
-            `)
             const [ access_token ] = await new Database(this.#database).query(`
                 INSERT INTO 
                     access_tokens
