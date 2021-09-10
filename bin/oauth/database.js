@@ -214,6 +214,18 @@ class Database
                     password VARCHAR (255) NOT NULL
                 )
             `
+
+            if ( this.#db_driver === `postgres` )
+            {
+                await this.query(`
+                    CREATE SEQUENCE IF NOT EXISTS user_id_seq
+                `)
+
+                await this.query(`
+                    ALTER TABLE users
+                    ALTER COLUMN user_id SET DEFAULT nextval('user_id_seq')
+                `)
+            }
             return await this.query(sql)
         }
         catch (e)
