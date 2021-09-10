@@ -22,6 +22,7 @@ class Users_Model extends Model
             const sql = `
                 INSERT INTO users(email, username, password)
                 VALUES ('${email}', '${username}', '${password}')
+                RETURNING email, username
             `
             return await this.query(sql)
         }
@@ -35,10 +36,12 @@ class Users_Model extends Model
     {
         try
         {
-            const sql = `
+            await this.query(`
+                DELETE FROM access_tokens
+            `)
+            return await this.query(`
                 DELETE FROM users
-            `
-            return await this.query(sql)
+            `)
         }
         catch (e)
         {
