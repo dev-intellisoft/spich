@@ -19,9 +19,9 @@ class PGOAuth2Model
         console.log(1)
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/auth`)
                 const model = new pg_model.default
                 if ( typeof model.getClient === `function`)
                     return await model.getClient ( client_id, client_secret, callback )
@@ -60,9 +60,9 @@ class PGOAuth2Model
         console.log(2)
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/auth`)
                 const model = new pg_model.default
                 if ( typeof model.grantTypeAllowed === `function`)
                     return await model.grantTypeAllowed ( client_id, grant_type, callback )
@@ -83,9 +83,9 @@ class PGOAuth2Model
         console.log(3)
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/auth`)
                 const model = new pg_model.default
                 if ( typeof model.getUser === `function`)
                     return await model.getUser ( username, password, callback )
@@ -120,9 +120,9 @@ class PGOAuth2Model
         console.log(4)
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/auth`)
                 const model = new pg_model.default
                 if ( typeof model.saveRefreshToken === `function`)
                     return await model.saveRefreshToken ( refresh_token, client_id, expires, user_id, callback )
@@ -159,9 +159,9 @@ class PGOAuth2Model
         console.log(5)
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/auth`)
                 const model = new pg_model.default
                 if ( typeof model.saveAccessToken === `function`)
                     return await model.saveAccessToken ( access_token, client_id, expires, user_id, callback )
@@ -198,9 +198,9 @@ class PGOAuth2Model
         try
         {
 
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/auth`)
                 const model = new pg_model.default
                 if ( typeof model.getAccessToken === `function`)
                     return await model.getAccessToken ( bearer_token )
@@ -252,9 +252,9 @@ class PGOAuth2Model
         console.log ( 7 )
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/auth`)
                 const model = new pg_model.default
                 if ( typeof model.getRefreshToken === `function`)
                     return await model.getRefreshToken ( bearer_token )
@@ -313,9 +313,9 @@ class PGOAuth2Model
     revokeToken = async() =>
     {
         console.log(8)
-        if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+        if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
         {
-            const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+            const pg_model = await import(`${APP_PATH}/core/model/auth`)
             const model = new pg_model.default
             if ( typeof model.revokeToken === `function`)
                 return await model.revokeToken ()
@@ -330,9 +330,9 @@ class PGOAuth2Model
         console.log(9)
         try
         {
-            if ( await fs.existsSync(`${APP_PATH}/core/model/oauth-pg.js`) )
+            if ( await fs.existsSync(`${APP_PATH}/core/model/auth.js`) )
             {
-                const pg_model = await import(`${APP_PATH}/core/model/oauth-pg`)
+                const pg_model = await import(`${APP_PATH}/core/model/auth`)
                 const model = new pg_model.default
                 if ( typeof model.saveToken === `function`)
                     return await model.saveToken ( token, { app_id, app_name }, user_id )
