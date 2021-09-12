@@ -103,12 +103,23 @@ class Auth_Model extends Model
             return e
         }
     }
-    getAccessToken = async () =>
+    getAccessToken = async ( bearer_token ) =>
     {
         console.log(6)
         try
         {
-            const sql = ``
+            const sql = `
+                SELECT 
+                    at.access_token, at.app_name, at.expires, at.user_id, at.app_id
+                FROM 
+                    access_tokens at
+                LEFT JOIN 
+                    users u 
+                ON 
+                    u.user_id = at.user_id
+                WHERE 
+                    access_token = '${bearer_token}'
+            `
             return await this.query(sql)
         }
         catch (e)
@@ -117,13 +128,53 @@ class Auth_Model extends Model
             return e
         }
     }
-    getRefreshToken = async () =>
+    getRefreshToken = async ( bearer_token ) =>
     {
         console.log(7)
         try
         {
-            const sql = ``
-            return await this.query(sql)
+            const sql = `
+                SELECT 
+                    refresh_token, app_name, expires, user_id 
+                FROM 
+                    refresh_tokens 
+                WHERE 
+                    refresh_token = '${bearer_token}'
+            `
+
+            const [ result ] = await this.query(sql)
+
+            const sql2 = `
+                SELECT 
+                    app_id, app_name
+                FROM 
+                    applications
+                WHERE 
+                    app_name = '${result.app_name}'
+            `
+
+            const [ client ] = await this.query(sql2)
+
+
+            const sql3 = `
+                SELECT 
+                    *
+                FROM
+                    users
+                WHERE   
+                    user_id = ${result.user_id}
+            `
+
+            const [ user ] = await this.query(sql3)
+
+
+            return {
+                refreshToken: result.refresh_token,
+                refreshTokenExpiresAt: new Date(result.expires),
+                scope: [`read`, `write`],
+                client: client.app_name, // with 'id' property
+                user: user.user_id
+            }
         }
         catch (e)
         {

@@ -1,4 +1,5 @@
 import { Loader } from 'spich'
+import Database from "../../../../src/core/database";
 class Auth extends Loader
 {
     constructor (props)
@@ -87,8 +88,24 @@ class Auth extends Loader
         try
         {
             await this.model(`auth`)
-            const result = await this.auth_model.getAccessToken( bearer_token )
-            return result
+            const [ result ] = await this.auth_model.getAccessToken( bearer_token )
+
+            if (!result)
+                throw new Error(`Error`)
+
+            return {
+                accessToken: result.access_token,
+                clientId: result.app_id,
+                expires: new Date(result.expires),
+                accessTokenExpiresAt:new Date(result.expires),
+                user_id: result.user_id,
+                app_id: result.app_id,
+                app_name: result.app_name,
+                user: {
+                    user_id:result.user_id
+                }
+            }
+
         }
         catch (e)
         {
@@ -96,13 +113,12 @@ class Auth extends Loader
             return e
         }
     }
-    getRefreshToken = async () =>
+    getRefreshToken = async ( bearer_token ) =>
     {
         try
         {
             await this.model(`auth`)
-            const result = await this.auth_model.getRefreshToken()
-            return result
+            return await this.auth_model.getRefreshToken( bearer_token )
         }
         catch (e)
         {
@@ -112,17 +128,7 @@ class Auth extends Loader
     }
     revokeToken = async () =>
     {
-        try
-        {
-            await this.model(`auth`)
-            const result = await this.auth_model.revokeToken()
-            return result
-        }
-        catch (e)
-        {
-            console.log(e)
-            return e
-        }
+        return true
     }
     saveToken = async ( token, { app_id, app_name }, user_id  ) =>
     {
