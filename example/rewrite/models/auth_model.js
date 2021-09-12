@@ -108,35 +108,8 @@ class Auth_Model extends Model
         console.log(6)
         try
         {
-            const sql = `
-                SELECT 
-                    at.access_token, at.app_name, at.expires, at.user_id, at.app_id
-                FROM 
-                    access_tokens at
-                LEFT JOIN 
-                    users u 
-                ON 
-                    u.user_id = at.user_id
-                WHERE 
-                    access_token = '${bearer_token}'
-            `
-            const [ result ] = await this.query(sql)
-
-            if ( !result )
-                return throw Error(`Error`)
-
-            return {
-                accessToken: result.access_token,
-                clientId: result.app_id,
-                expires: new Date(result.expires),
-                accessTokenExpiresAt:new Date(result.expires),
-                user_id: result.user_id,
-                app_id: result.app_id,
-                app_name: result.app_name,
-                user: {
-                    user_id:result.user_id
-                }
-            }
+            const sql = ``
+            return await this.query(sql)
         }
         catch (e)
         {

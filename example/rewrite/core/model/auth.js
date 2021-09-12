@@ -82,12 +82,12 @@ class Auth extends Loader
             return e
         }
     }
-    getAccessToken = async () =>
+    getAccessToken = async ( bearer_token ) =>
     {
         try
         {
             await this.model(`auth`)
-            const result = await this.auth_model.getAccessToken()
+            const result = await this.auth_model.getAccessToken( bearer_token )
             return result
         }
         catch (e)
