@@ -238,8 +238,11 @@ class Database
     {
         try
         {
+            let fragment = ``
+            if ( this.#db_driver === `mysql` )
+                fragment = `IGNORE`
             let sql = `
-                INSERT IGNORE INTO applications(app_name, app_secret) VALUES('${application}', '${password}')
+                INSERT ${fragment} INTO applications(app_name, app_secret) VALUES('${application}', '${password}')
             `
             if ( this.#db_driver === `postgres` )
             {
