@@ -72,7 +72,7 @@ const init = () =>
         fs.writeFileSync(`config.js`, config)
 }
 
-const create = () =>
+const create = async () =>
 {
     if ( !fs.existsSync(`controllers`) )
         init()
@@ -87,8 +87,17 @@ const create = () =>
     let loaders = ``
     if ( params.includes(`m`) )
     {
+        const { config } = await import(`${process.env.PWD}/config.js`)
+
+        let db_name = ``
+        if ( config.databases && config.databases.length )
+            db_name = `, \`${config.databases[0].name}\``
+
         let model = fs.readFileSync(`${source_path}/models/index.js`).toString()
         model = model.replace(/{{model}}/g, `${name}_Model`)
+
+        model = model.replace(/{{db_name}}/g, db_name)
+
         if ( !fs.existsSync(`models/${name.toLowerCase()}_model.js`) )
             fs.writeFileSync(`models/${name.toLowerCase()}_model.js`, model)
         loaders = `${loaders} await this.model(\`${name}\`)\n`

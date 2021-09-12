@@ -12,7 +12,7 @@ class {{model}} extends Model
 {
     constructor(props)
     {
-        super(props)
+        super(props {{db_name}})
     }
 
     async your_func()
