@@ -1,5 +1,5 @@
 import { Loader } from 'spich'
-import Database from "../../../../src/core/database";
+
 class Auth extends Loader
 {
     constructor (props)
