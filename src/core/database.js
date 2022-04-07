@@ -112,7 +112,7 @@ class  Database
                     const pool = mysql.createPool({
                         host: this.#db_host,
                         user: this.#db_user,
-                        database: this.#db_password,
+                        database: this.#db_database,
                         password: this.#db_password,
                         waitForConnections: true,
                         connectionLimit: 20,
