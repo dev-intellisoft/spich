@@ -15,8 +15,8 @@ import OAuth2Server from 'oauth2-server'
 import socketio from 'socket.io'
 import Logger from './logger'
 import fileUpload from 'express-fileupload'
-import pack from '../../package.json'
 import Router from './router'
+import { readFile } from 'fs/promises'
 
 class Spich
 {
@@ -48,9 +48,19 @@ class Spich
             this.#app.use(fileUpload())
             this.#app.use('/uploads', express.static(UPLOADS_PATH))
 
-            this.#project = await import(`${APP_PATH}/package.json`)
-            const { config } = await import(`${APP_PATH}/config`)
-            this.#config = config
+            const pack = JSON.parse(
+                await readFile(
+                    new URL(`../../package.json`, import.meta.url)
+                )
+            )
+
+            this.#project = JSON.parse(
+                await readFile(
+                    new URL(`${APP_PATH}/package.json`, import.meta.url)
+                )
+            )
+
+            this.#config  = await import(`${APP_PATH}/config`)
 
             if ( this.#project.default )
                 this.#project = this.#project.default
