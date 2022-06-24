@@ -68,10 +68,11 @@ class  Database
                 const password = this.#db_password
                 const host = this.#db_host
                 const database = this.#db_database
+                const port = this.#db_port
 
                 return new Promise(function (resolve, reject)
                 {
-                    const config = { user, password, host, database, max:10, idleTimeoutMillis: 1000 }
+                    const config = { user, password, host, port, database, max:10, idleTimeoutMillis: 1000 }
 
                     const pool = new Pool(config)
 
