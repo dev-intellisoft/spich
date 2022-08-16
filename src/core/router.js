@@ -3,7 +3,7 @@
  */
 import fs from 'fs'
 import Input from '../core/input'
-import Logger from "spich/src/core/logger"
+import Logger from "./logger"
 
 let routes = []
 
