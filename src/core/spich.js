@@ -40,7 +40,7 @@ class Spich
         {
             this.#app.use(helmet())
             this.#app.disable(`x-powered-by`)
-            this.#app.set(`trust_proxy`, true);
+            this.#app.set(`trust_proxy`, true)
             this.#app.use(cors())
             this.#app.use(bodyParser.json())
             this.#app.use(bodyParser.text())
@@ -60,7 +60,9 @@ class Spich
                 )
             )
 
-            this.#config  = await import(`${APP_PATH}/config`)
+            const { config } = await import(`${APP_PATH}/config`)
+
+            this.#config  = config
 
             if ( this.#project.default )
                 this.#project = this.#project.default
@@ -110,7 +112,7 @@ class Spich
             }
 
 
-            //todo update socketio version
+            //todo update socket.io version
             global.io = socketio(this.#server)
 
             io.on('connection', (socket) =>
